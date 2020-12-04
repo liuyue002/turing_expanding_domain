@@ -30,7 +30,7 @@ Wmax = 1.0; %1.5
 %W=@(x,y,t) ((x.^2 + y.^2) > (radius(t)^2)) * Wmax; % illumination level
 %W=@(x,y,t) Wmax - (y<80).*(y> -80).*(x>-80).*(x < (-60 + growthrate*t)) *Wmax;
 %W=@(x,y,t) Wmax*heaviside(x-(-80+growthrate*t));
-wid=10;
+wid=10; % L
 W=@(x,y,t) Wmax*(1-heaviside(-x+(-80+growthrate*t)).*heaviside(y+wid).*heaviside(-y+wid));
 %W=@(x,y,t) ones(size(x))*0;
 

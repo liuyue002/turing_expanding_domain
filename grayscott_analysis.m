@@ -1,17 +1,15 @@
 %% well-mixed system analysis
 syms u v q q2
-gamma = 1;
-a = 0.05;
-b = 1.4;
-du = 1;
-dv = 20;
+F=0.0295;
+K=0.0561;
+du = 0.16;
+dv = 0.08;
 W=0.0;
-uyy_est = -0.28810;
-vyy_est =  0.06471;
-f = gamma * (a-u+u^2 *v +W) + du*uyy_est;
-g = gamma * (b - u^2 *v )   + dv*vyy_est;
-u0 = (a+W+du/gamma*uyy_est)+b;
-v0 = (b+dv/gamma*vyy_est)/(u0^2);
+f = -u*v^2 + F*(1-u)-W;
+g =  u*v^2 -(F+K)*v;
+d=1-(4*(F+K)^2)/F;
+u0 = 1;
+v0 = 0;
 
 Jwm = [diff(f,u), diff(f,v);
        diff(g,u), diff(g,v)];

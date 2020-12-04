@@ -5,7 +5,7 @@ makegif=0;
 showanimation=1;
 kymograph=0;
 drawperframe=500;
-L=1000; % half-domain size
+L=100; % half-domain size
 nx=200;
 dx=2*L/nx;
 %growthrate = 0.1; % bif, 0.05 to 0.75
@@ -32,8 +32,8 @@ Wmax = 1.0; %1.5
 W=@(x,y,t) ones(size(x))*0;
 
 %% reaction
-f = @(u,v,x,t) -(u.^2).*v + F*(1-u) - W(x,t);
-g = @(u,v,x,t)  (u.^2).*v - (F+K)*v;
+f = @(u,v,x,t) -(v.^2).*u + F*(1-u) - W(x,t);
+g = @(u,v,x,t)  (v.^2).*u - (F+K)*v;
 d=1-(4*(F+K)^2)/F;
 if d>= 0 
     u0 = (1-sqrt(d))/2;

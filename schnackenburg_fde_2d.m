@@ -3,25 +3,24 @@ clear;clc;close all;
 %% options
 makegif=1;
 showanimation=1;
-drawperframe=50;
+drawperframe=200;
 L=100; % half-domain size
 nx=200;
 dx=2*L/nx;
-growthrate = 0.2; % bif, 0.05 to 0.75
+growthrate = 0.1; % bif, 0.05 to 0.75
 %T=200/growthrate + 50;
-T=100;
-dt=0.002;
+T=200;
+dt=0.01;
 nt=T/dt+1;
 nFrame=ceil((T/dt)/drawperframe);
 
 %% parameters
-gamma = 1;
-a = 0.2;
-b = 2.0;
+gamma = 1.0;
+a = 0.05;
+b = 1.6;
 Du = 1;
-Dv = 100;
-%growthrate = 0.2; % bif, 0.05 to 0.75
-Wmax = 0.6; %1.5
+Dv = 20;
+Wmax = 1.0; %1.5
 %radius = @(t) min(growthrate*t + heaviside(t-350)*0.3*(t-350), 100);
 %radius = @(t) min(growthrate*t, 100);
 %radius = @(t) 50 + min((growthrate * (max(t-50,0))), 50);
@@ -36,7 +35,7 @@ f = @(u,v,x,y,t) gamma * (a + W(x,y,t) - u + (u.^2).*v);
 g = @(u,v,x,y,t) gamma * (b - (u.^2).*v);
 u0 = a+Wmax+b;
 v0 = b/(u0^2);
-noisestrength = 0;
+noisestrength = 0.01;
 fprintf('Equilibrium: u0=%.5f, v0=%.5f\n',u0,v0);
 
 %% FDM setup
@@ -66,12 +65,12 @@ A = A/(dx^2);
 u(:)=u0;
 u = u + (rand(size(u))*0.6-0.3);
 %u = rand(size(u))*3;
-%q=0.8;
-%u = 1.5 + cos(q*Y);
+%q=0.6;
+%u = 2.5 + 1.5*cos(q*Y);
 v(:)=v0;
 
 folder='/home/liuy1/Documents/turingpattern/simulations/';
-prefix = strcat('schnackenburg_2d_noisy_square_' , datestr(datetime('now'), 'yyyymmdd_HHMMSS'), '_b=', num2str(b), '_growth=', num2str(growthrate) );
+prefix = strcat('schnackenburg_2d_noisy_square_hssinit_' , datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate) );
 prefix = strcat(folder, prefix);
 if makegif
     save([prefix,'.mat'], '-mat');
@@ -84,7 +83,7 @@ if showanimation
     fig=figure('Position',fig_pos);
     numticks=10;
     sfig1=subplot(1,3,1);
-    ufig=imagesc(u,[0,6]);
+    ufig=imagesc(u,[0,4]);
     set(gca,'YDir','normal');
     colormap('hot');
     colorbar;
@@ -99,7 +98,7 @@ if showanimation
     pbaspect([1 1 1]);
     %ucirc=draw_circle(nx/2,nx/2,0);
     sfig2=subplot(1,3,2);
-    vfig=imagesc(v, [0, 0.8]);
+    vfig=imagesc(v, [0, 1.2]);
     set(gca,'YDir','normal');
     colormap('hot');
     colorbar;

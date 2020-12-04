@@ -2,3 +2,5 @@
 simulations
 papers
 *.mat
+*.m~
+oldstuff

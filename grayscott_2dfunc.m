@@ -11,7 +11,7 @@ dx=2*L/nx;
 %growthrate = 0.1; % bif, 0.05 to 0.75
 %T=200/growthrate + 50;
 T=400;
-dt=0.001;
+dt=0.005;
 nt=T/dt+1;
 nFrame=ceil((T/dt)/drawperframe);
 
@@ -43,7 +43,7 @@ else
     v0=0;
     fprintf('Warning: nontrivial HSS do not exist\n');
 end
-noisestrength = 0.01;
+noisestrength = 0.0;
 fprintf('Equilibrium: u0=%.5f, v0=%.5f\n',u0,v0);
 
 %% FDM setup
@@ -70,20 +70,22 @@ A(end-nx+1:end,end-nx+1:end)=T2;
 A = A/(dx^2);
 
 %% initial condition
-u(:)=u0;
-u = u + (rand(size(u))*0.6-0.3);
+%u(:)=u0;
+%u = u + (rand(size(u))*0.6-0.3);
 %u = rand(size(u))*3;
+u = rand(size(u))*0.6+0.7;
 %q=2*pi*0.09;
 %u = 1.64 + 0.70*cos(q*Y);
-v(:)=v0;
+%v(:)=v0;
+v = rand(size(v))*0.4;
 %v = 0.60 - 0.13*cos(q*Y);
 
 if ispc % is windows
     folder='D:\liuyueFolderOxford1\turingpattern\simulations\';
-else % is linux
+else % is unix/linux
     folder='/home/liuy1/Documents/turingpattern/simulations/';
 end
-prefix = strcat('grayscott_2d_noisy_square_hssinit_' , datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_F=',num2str(F), '_K=', num2str(K), '_growth=', num2str(growthrate) );
+prefix = strcat('grayscott_2d_square_hssinit_' , datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_F=',num2str(F), '_K=', num2str(K), '_growth=', num2str(growthrate) );
 prefix = strcat(folder, prefix);
 if makegif
     save([prefix,'.mat'], '-mat');
@@ -181,7 +183,7 @@ for ti=1:1:nt
     urhs = uvec + dt*(fvec + (1-th)*Du*A*uvec);
     unew = Tu\urhs;
     u = reshape(unew,[nx,nx]);
-    u = u + normrnd(0,noisestrength,size(u));
+    %u = u + normrnd(0,noisestrength,size(u));
     
     vrhs = vvec + dt*(gvec + (1-th)*Dv*A*vvec);
     vnew = Tv\vrhs;

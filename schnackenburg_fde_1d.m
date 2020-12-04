@@ -3,7 +3,7 @@ clear;clc;close all;
 %% options
 makegif=1;
 showanimation=1;
-kymograph=0;
+kymograph=1;
 drawperframe=100;
 L=100; % half-domain size
 nx=400;
@@ -21,7 +21,6 @@ a = 0.05;
 b = 1.4;
 Du = 1;
 Dv = 20;
-%growthrate = 0.2; % bif, 0.05 to 0.75
 Wmax = 1.0; %1.5
 %W=@(x,t) Wmax*heaviside(x-(-80+growthrate*t));
 W=@(x,t) Wmax*heaviside(x-(-80+growthrate*max(t-50,0)));
@@ -140,17 +139,7 @@ for ti=1:1:nt
     end
 end
 
-if makegif
-    ufinal = u;
-    vfinal = v;
-    save([prefix,'.mat'],'ufinal','vfinal', '-mat','-append');
-end
-if kymograph
-    plot_kymograph(uu, fig_pos, nFrame, nx,T);
-    plot_kymograph(vv, fig_pos, nFrame, nx,T);
-end
-
-%%
+%% estimate period and amplitude
 uavg = (max(u,[],'all')+min(u,[],'all'))/2;
 uamp = max(u,[],'all') - uavg;
 vavg = (max(v,[],'all')+min(v,[],'all'))/2;
@@ -162,3 +151,14 @@ fprintf('For the final pattern:\n');
 fprintf('uavg=%.4f, amplitude=%.4f\n',uavg,uamp);
 fprintf('vavg=%.4f, amplitude=%.4f\n',vavg,vamp);
 fprintf('Estimated period=%.4f, freq=%.4f\n',est_period,1/est_period);
+
+%% save
+if makegif
+    ufinal = u;
+    vfinal = v;
+    save([prefix,'.mat'],'ufinal','vfinal','uavg','uamp','vavg','vamp','est_period', '-mat','-append');
+end
+if kymograph
+    plot_kymograph(uu, fig_pos, nFrame, nx,T);
+    plot_kymograph(vv, fig_pos, nFrame, nx,T);
+end
