@@ -21,8 +21,7 @@ a = 0.05;
 b = 1.4;
 Du = 1;
 Dv = 20;
-Wmax = 1.0; %1.5
-%W=@(x,t) Wmax*heaviside(x-(-80+growthrate*t));
+Wmax = 1.0; %1.0
 W=@(x,t) Wmax*heaviside(x-(-80+growthrate*max(t-50,0)));
 %W=@(x,t) ones(size(x))*0;
 
@@ -32,8 +31,8 @@ vyy_est =  0.0; %  0.06471;
 %% reaction
 f = @(u,v,x,t) gamma * (a + W(x,t) - u + (u.^2).*v) + Du*uyy_est;
 g = @(u,v,x,t) gamma * (b - (u.^2).*v) + Dv*vyy_est;
-u0 = a+Wmax+b;
-v0 = b/(u0^2);
+u0 = a+Wmax+b+Du\gamma*uyy_est+Dv\gamma*vyy_est;
+v0 = (b+Dv\gamma*vyy_est)/(u0^2);
 noisestrength = 0;
 fprintf('Equilibrium: u0=%.5f, v0=%.5f\n',u0,v0);
 
@@ -56,9 +55,17 @@ u = u + (rand(size(u))*0.6-0.3);
 %u = 1.5 + cos(q*Y);
 v(:)=v0;
 
-%folder='/home/liuy1/Documents/turingpattern/simulations/';
-folder='D:\liuyueFolderOxford1\turingpattern\simulations\';
-prefix = strcat('schnackenburg_1d_' , datestr(datetime('now'), 'yyyymmdd_HHMMSS'), '_b=', num2str(b), '_growth=', num2str(growthrate) );
+if ispc % is windows
+    folder='D:\liuyueFolderOxford1\turingpattern\simulations\';
+else % is linux
+    folder='/home/liuy1/Documents/turingpattern/simulations/';
+end
+if uyy_est==0 && vyy_est==0
+    uyytext = '';
+else
+    uyytext = 'uyyAdjusted_';
+end
+prefix = strcat('schnackenburg_1d_',uyytext , datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate) );
 prefix = strcat(folder, prefix);
 if makegif
     save([prefix,'.mat'], '-mat');
@@ -67,8 +74,8 @@ end
 %% Set up figure
 giffile = [prefix,'.gif'];
 if showanimation
-    fig_pos = [10 100 1300 500];
-    fig=figure('Position',fig_pos);
+    fig_pos = [10 100 1000 500];
+    fig=figure('Position',fig_pos,'color','w');
     hold on
     xlabel('x');
     ylabel('u,v,W');
@@ -79,6 +86,7 @@ if showanimation
     wfig=plot(x,Wval);
     legend('u','v','W');
     figtitle=title('t=0');
+    tightEdge(gca);
     hold off
 end
 

@@ -9,7 +9,7 @@ L=100; % half-domain size
 nx=200;
 dx=2*L/nx;
 %growthrate = 0.1; % bif, 0.05 to 0.75
-T=200/growthrate + 50;
+T=200/growthrate + 100;
 %T=1000;
 dt=0.01;
 nt=T/dt+1;
@@ -21,17 +21,9 @@ a = 0.05;
 b = 1.4;
 Du = 1;
 Dv = 20;
-%growthrate = 0.2; % bif, 0.05 to 0.75
-Wmax = 1.0; %1.5
-%radius = @(t) min(growthrate*t + heaviside(t-350)*0.3*(t-350), 100);
-%radius = @(t) min(growthrate*t, 100);
-%radius = @(t) 50 + min((growthrate * (max(t-50,0))), 50);
-%radius = @(t) floor(min(growthrate * t, 100)/2.5)*2.5;
-%W=@(x,y,t) ((x.^2 + y.^2) > (radius(t)^2)) * Wmax; % illumination level
-%W=@(x,y,t) Wmax - (y<80).*(y> -80).*(x>-80).*(x < (-60 + growthrate*t)) *Wmax;
-%W=@(x,y,t) Wmax*heaviside(x-(-80+growthrate*t));
+Wmax = 1.0; %1.0
 wid=10; % L
-W=@(x,y,t) Wmax*(1-heaviside(-x+(-80+growthrate*t)).*heaviside(y+wid).*heaviside(-y+wid));
+W=@(x,y,t) Wmax*(1-heaviside(-x+(-80+growthrate*max(t-50,0))).*heaviside(y+wid).*heaviside(-y+wid));
 %W=@(x,y,t) ones(size(x))*0;
 
 %% reaction
@@ -74,8 +66,23 @@ u = u + (rand(size(u))*0.6-0.3);
 v(:)=v0;
 %v = 0.60 - 0.13*cos(q*Y);
 
-folder='/home/liuy1/Documents/turingpattern/simulations/';
-prefix = strcat('schnackenburg_2d_nonoise_narrow_hssinit_' , datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate) );
+if ispc % is windows
+    folder='D:\liuyueFolderOxford1\turingpattern\simulations\';
+else % is linux
+    folder='/home/liuy1/Documents/turingpattern/simulations/';
+end
+if noisestrength == 0
+    noisetext='nonoise_';
+else
+    noisetext='noisy_';
+end
+if wid == L
+    widthtext='';
+else
+    widthtext=['narrow_wid=', num2str(wid),'_'];
+end
+ictext = 'hssinit_'; % 'hssinit_' or 'wavyinit_'
+prefix = strcat('schnackenburg_2d_',noisetext,widthtext,ictext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate) );
 prefix = strcat(folder, prefix);
 if makegif
     save([prefix,'.mat'], '-mat');
@@ -86,10 +93,10 @@ giffile = [prefix,'.gif'];
 giffile_horiz = [prefix,'_horizcrossec.gif'];
 giffile_vert = [prefix,'_vertcrossec.gif'];
 if showanimation
-    fig_pos = [100 300 1650 350];
-    fig=figure('Position',fig_pos);
+    fig_pos = [100 100 1650 500];
+    fig=figure('Position',fig_pos,'color','w');
     numticks=10;
-    sfig1=subplot(1,3,1);
+    sfig1=subplot('Position',[0.04,0,0.28,1]);
     urange=[0,4];
     ufig=imagesc(u,urange);
     xlabel('x');
@@ -105,10 +112,10 @@ if showanimation
     xlim([0,200]);
     ylim([0,200]);
     utitle=title('u, t=0');
-    pbaspect([1 1 1]);
+    %pbaspect([1 1 1]);
     %ucirc=draw_circle(nx/2,nx/2,0);
-    sfig2=subplot(1,3,2);
-    vfig=imagesc(v, [0,1.0]);
+    sfig2=subplot('Position',[0.37,0,0.28,1]);
+    vfig=imagesc(v, [0,1.2]);
     xlabel('x');
     ylabel('y');
     set(gca,'YDir','normal');
@@ -122,9 +129,8 @@ if showanimation
     xlim([0,200]);
     ylim([0,200]);
     title('v');
-    pbaspect([1 1 1]);
-    %vcirc=draw_circle(nx/2,nx/2,0);
-    sfig3=subplot(1,3,3);
+    %pbaspect([1 1 1]);
+    sfig3=subplot('Position',[0.70,0,0.28,1]);
     Wval=W(X,Y,0);
     Wfig=imagesc(Wval,[0, 1]); %[0,Wmax]
     xlabel('x');
@@ -140,24 +146,27 @@ if showanimation
     xlim([0,200]);
     ylim([0,200]);
     title('W');
-    pbaspect([1 1 1]);
+    %pbaspect([1 1 1]);
     
-    fig_horiz=figure('Position',[100,100,600,500]);
+    crosssec_fig_pos=[100,100,600,500];
+    fig_horiz=figure('Position',crosssec_fig_pos,'color','w');
     hold on;
     horiz_crossec=plot(x,u(round(nx/2),:));
     ylim(urange);
     fig_horiz_title=title('u(y=0,t=0)');
     xlabel('x');
     ylabel('u');
+    tightEdge(gca);
     hold off
     
-    fig_vert=figure('Position',[100,100,600,500]);
+    fig_vert=figure('Position',crosssec_fig_pos,'color','w');
     hold on;
     vert_crossec=plot(y,u(:,round(nx/2)));
     ylim(urange);
     fig_vert_title=title('u(x=0,t=0)');
     xlabel('y');
     ylabel('u');
+    tightEdge(gca);
     hold off
 end
 

@@ -10,7 +10,7 @@ uyy_est = -0.28810;
 vyy_est =  0.06471;
 f = gamma * (a-u+u^2 *v +W) + du*uyy_est;
 g = gamma * (b - u^2 *v )   + dv*vyy_est;
-u0 = (a+W+du/gamma*uyy_est)+b;
+u0 = (a+W+du/gamma*uyy_est)+(b+dv/gamma*vyy_est);
 v0 = (b+dv/gamma*vyy_est)/(u0^2);
 
 Jwm = [diff(f,u), diff(f,v);
