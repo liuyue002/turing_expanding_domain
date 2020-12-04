@@ -1,6 +1,6 @@
 %clear;clc;close all;
 
-function schnackenburg_2dfunc_moreplots(growthrate)
+function schnackenberg_2dfunc(growthrate)
 %% options
 makegif=1;
 showanimation=1;
@@ -13,7 +13,6 @@ T=200/growthrate + 100;
 %T=1000;
 dt=0.01;
 nt=T/dt+1;
-nFrame=ceil((T/dt)/drawperframe);
 
 %% parameters
 gamma = 1.0;
@@ -82,7 +81,7 @@ else
     widthtext=['narrow_wid=', num2str(wid),'_'];
 end
 ictext = 'hssinit_'; % 'hssinit_' or 'wavyinit_'
-prefix = strcat('schnackenburg_2d_',noisetext,widthtext,ictext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate) );
+prefix = strcat('schnackenberg_2d_',noisetext,widthtext,ictext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate) );
 prefix = strcat(folder, prefix);
 if makegif
     save([prefix,'.mat'], '-mat');

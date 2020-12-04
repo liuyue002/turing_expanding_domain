@@ -65,7 +65,7 @@ if uyy_est==0 && vyy_est==0
 else
     uyytext = 'uyyAdjusted_';
 end
-prefix = strcat('schnackenburg_1d_',uyytext , datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate) );
+prefix = strcat('schnackenberg_1d_',uyytext , datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate) );
 prefix = strcat(folder, prefix);
 if makegif
     save([prefix,'.mat'], '-mat');
