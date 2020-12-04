@@ -26,8 +26,8 @@ Wmax = 1.0; %1.5
 W=@(x,t) Wmax*heaviside(x-(-80+growthrate*max(t-50,0)));
 %W=@(x,t) ones(size(x))*0;
 
-uyy_est = -0.28810;
-vyy_est =  0.06471;
+uyy_est = -0.0; % -0.28810;
+vyy_est =  0.0; %  0.06471;
 
 %% reaction
 f = @(u,v,x,t) gamma * (a + W(x,t) - u + (u.^2).*v) + Du*uyy_est;
@@ -58,7 +58,7 @@ v(:)=v0;
 
 %folder='/home/liuy1/Documents/turingpattern/simulations/';
 folder='D:\liuyueFolderOxford1\turingpattern\simulations\';
-prefix = strcat('schnackenburg_1d_uyyAdjusted_' , datestr(datetime('now'), 'yyyymmdd_HHMMSS'), '_b=', num2str(b), '_growth=', num2str(growthrate) );
+prefix = strcat('schnackenburg_1d_' , datestr(datetime('now'), 'yyyymmdd_HHMMSS'), '_b=', num2str(b), '_growth=', num2str(growthrate) );
 prefix = strcat(folder, prefix);
 if makegif
     save([prefix,'.mat'], '-mat');
@@ -159,6 +159,9 @@ if makegif
     save([prefix,'.mat'],'ufinal','vfinal','uavg','uamp','vavg','vamp','est_period', '-mat','-append');
 end
 if kymograph
-    plot_kymograph(uu, fig_pos, nFrame, nx,T);
-    plot_kymograph(vv, fig_pos, nFrame, nx,T);
+    kymograph_pos = [100,100,650,500];
+    u_kymograph = plot_kymograph(uu, kymograph_pos,T,[-L,L],'u');
+    v_kymograph = plot_kymograph(vv, kymograph_pos,T,[-L,L],'v');
+    saveas(u_kymograph,[prefix,'_ukymograph.png']);
+    saveas(v_kymograph,[prefix,'_vkymograph.png']);
 end
