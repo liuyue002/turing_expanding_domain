@@ -160,11 +160,27 @@ fprintf('uavg=%.4f, amplitude=%.4f\n',uavg,uamp);
 fprintf('vavg=%.4f, amplitude=%.4f\n',vavg,vamp);
 fprintf('Estimated period=%.4f, freq=%.4f\n',est_period,1/est_period);
 
+[peakval,peakloc]=findpeaks(u); %does not include possible peaks on boundary
+uxx=u(peakloc+1)+u(peakloc-1)-2*u(peakloc);
+vxx=v(peakloc+1)+v(peakloc-1)-2*v(peakloc);
+uxx_peaks = mean(uxx);
+vxx_peaks = mean(vxx);
+fprintf('u_{xx} Averaged on peaks: %.5f\n',uxx_peaks);
+fprintf('v_{xx} Averaged on peaks: %.5f\n',vxx_peaks);
+
+[valyval,valyloc]=findpeaks(-u); %does not include possible peaks on boundary
+uxx=u(valyloc+1)+u(valyloc-1)-2*u(valyloc);
+vxx=v(valyloc+1)+v(valyloc-1)-2*v(valyloc);
+uxx_valy = mean(uxx);
+vxx_valy = mean(vxx);
+fprintf('u_{xx} Averaged on valleys: %.5f\n',uxx_valy);
+fprintf('v_{xx} Averaged on valleys: %.5f\n',vxx_valy);
+
 %% save
 if makegif
     ufinal = u;
     vfinal = v;
-    save([prefix,'.mat'],'ufinal','vfinal','uavg','uamp','vavg','vamp','est_period', '-mat','-append');
+    save([prefix,'.mat'],'ufinal','vfinal','uavg','uamp','vavg','vamp','est_period','uxx_peaks','vxx_peaks','uxx_valy','vxx_valy', '-mat','-append');
 end
 if kymograph
     kymograph_pos = [100,100,650,500];

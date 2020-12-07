@@ -244,10 +244,20 @@ for ti=1:1:nt
     end
 end
 
+%% estimate u_yy on the cross section y=0
+uyy = u(round(nx/2)+1,:) + u(round(nx/2)-1,:) -2*u(round(nx/2),:);
+vyy = v(round(nx/2)+1,:) + v(round(nx/2)-1,:) -2*v(round(nx/2),:);
+uyy_est = mean(uyy);
+vyy_est = mean(vyy);
+fprintf('u_{yy}(y=0) Average: %.5f\n',uyy_est);
+fprintf('v_{yy}(y=0) Average: %.5f\n',vyy_est);
+
+%% saving
+
 if makegif
     ufinal = u;
     vfinal = v;
-    save([prefix,'.mat'],'ufinal','vfinal', '-mat','-append');
+    save([prefix,'.mat'],'ufinal','vfinal','uyy_est','vyy_est', '-mat','-append');
 end
 
 end
