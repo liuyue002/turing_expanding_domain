@@ -40,7 +40,7 @@ disp(double(q2min));
 
 %% plot real part of dominant eigenvalue against q
 M2 = Jwm-D*q^2;
-qval = linspace(0,5,50);
+qval = linspace(0,2,500);
 eigM = eig(subs(M2, [u,v], [u0,v0]));
 eigenreal = max(real(double(subs(eigM,q,qval))),[],1);
 fig=figure;

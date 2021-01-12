@@ -1,12 +1,12 @@
 clear;clc;close all;
 
 %% options
-makegif=1;
+makegif=0;
 showanimation=1;
-kymograph=1;
+kymograph=0;
 drawperframe=100;
 L=100; % half-domain size
-nx=400;
+nx=200;
 dx=2*L/nx;
 growthrate = 0.1; % bif, 0.05 to 0.75
 %T=400;
@@ -22,8 +22,8 @@ b = 1.4;
 Du = 1;
 Dv = 20;
 Wmax = 1.0; %1.0
-W=@(x,t) Wmax*heaviside(x-(-80+growthrate*max(t-50,0)));
-%W=@(x,t) ones(size(x))*0;
+%W=@(x,t) Wmax*heaviside(x-(-80+growthrate*max(t-50,0)));
+W=@(x,t) ones(size(x))*0;
 
 uyy_est = -0.0; % -0.28810;
 vyy_est =  0.0; %  0.06471;

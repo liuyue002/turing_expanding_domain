@@ -9,21 +9,21 @@ L=100; % half-domain size
 nx=200;
 dx=2*L/nx;
 %growthrate = 0.1; % bif, 0.05 to 0.75
-T=200/growthrate + 100;
-%T=1000;
+%T=200/growthrate + 100;
+T=400;
 dt=0.01;
 nt=T/dt+1;
 
 %% parameters
 gamma = 1.0;
 a = 0.05;
-b = 1.4;
+b = 1.6;
 Du = 1;
 Dv = 20;
 Wmax = 1.0; %1.0
 wid=10; % L
-W=@(x,y,t) Wmax*(1-heaviside(-x+(-80+growthrate*max(t-50,0))).*heaviside(y+wid).*heaviside(-y+wid));
-%W=@(x,y,t) ones(size(x))*0;
+%W=@(x,y,t) Wmax*(1-heaviside(-x+(-80+growthrate*max(t-50,0))).*heaviside(y+wid).*heaviside(-y+wid));
+W=@(x,y,t) ones(size(x))*0;
 
 %% reaction
 f = @(u,v,x,y,t) gamma * (a + W(x,y,t) - u + (u.^2).*v);

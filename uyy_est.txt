@@ -1,0 +1,23 @@
+estimated from:
+simulations/schnackenburg_2d_noisy_narrow_hssinit_20201130_144415_a=0.05_b=1.4_growth=0.1.mat
+uyy_est = -0.28810;
+vyy_est =  0.06471;
+
+ratio uyy/vyy = -4.4522
+
+
+==============================
+
+simulations/schnackenburg_1d_20201202_130108_b=1.4_growth=0.1.mat
+u_{yy} Average: -0.07032
+v_{yy} Average: 0.01583
+
+ratio uyy/vyy = -4.4422
+
+==============================
+schnackenberg_2d_nonoise_narrow_wid=10_hssinit_20201210_120324_a=0.05_b=1.4_growth=0.75.mat
+
+u_{yy}(y=0) Average: -0.29594
+v_{yy}(y=0) Average: 0.06527
+
+ratio uyy/vyy = -4.5342
