@@ -255,12 +255,12 @@ fprintf('v_{yy}(y=0) Average: %.5f\n',vyy_est);
 
 %% plotting the final pattern
 if makegif
-    fig_pos = [100 100 1000 500];
-    figfinal=figure('Position',fig_pos,'color','w');
+    fig_pos = [100 100 610 500];
     numticks=4;
-    sfig1=subplot('Position',[0.11,0,0.37,1]);
+    
+    ufigfinal=figure('Position',fig_pos,'color','w');
     urange=[0,4];
-    ufigfinal=imagesc(u,urange);
+    imagesc(u,urange);
     set(gca,'FontSize',23);
     xlabel('x');
     ylabel('y');
@@ -268,17 +268,16 @@ if makegif
     colormap('hot');
     colorbar;
     axis image;
-    set(sfig1,'XTick',0:(nx/numticks):nx);
-    set(sfig1,'YTick',0:(nx/numticks):nx);
-    set(sfig1,'XTickLabel',num2str((-L:2*L/numticks:L)'));
-    set(sfig1,'YTickLabel',num2str((-L:2*L/numticks:L)'));
+    set(gca,'XTick',0:(nx/numticks):nx);
+    set(gca,'YTick',0:(nx/numticks):nx);
+    set(gca,'XTickLabel',num2str((-L:2*L/numticks:L)'));
+    set(gca,'YTickLabel',num2str((-L:2*L/numticks:L)'));
     xlim([0,200]);
     ylim([0,200]);
     title(['u, t=',num2str(T)],'FontSize',25);
-    %pbaspect([1 1 1]);
-    %ucirc=draw_circle(nx/2,nx/2,0);
-    sfig2=subplot('Position',[0.6,0,0.37,1]);
-    vfigfinal=imagesc(v, [0,1.2]);
+    
+    vfigfinal=figure('Position',fig_pos,'color','w');
+    imagesc(v, [0,1.2]);
     set(gca,'FontSize',23);
     xlabel('x');
     ylabel('y');
@@ -286,15 +285,16 @@ if makegif
     colormap('hot');
     colorbar;
     axis image;
-    set(sfig2,'XTick',0:(nx/numticks):nx);
-    set(sfig2,'YTick',0:(nx/numticks):nx);
-    set(sfig2,'XTickLabel',num2str((-L:2*L/numticks:L)'));
-    set(sfig2,'YTickLabel',num2str((-L:2*L/numticks:L)'));
+    set(gca,'XTick',0:(nx/numticks):nx);
+    set(gca,'YTick',0:(nx/numticks):nx);
+    set(gca,'XTickLabel',num2str((-L:2*L/numticks:L)'));
+    set(gca,'YTickLabel',num2str((-L:2*L/numticks:L)'));
     xlim([0,200]);
     ylim([0,200]);
     title('v','FontSize',25);
     
-    saveas(figfinal,[prefix,'_final.png']);
+    saveas(ufigfinal,[prefix,'_ufinal.png']);
+    saveas(vfigfinal,[prefix,'_vfinal.png']);
 end
 %% saving
 
