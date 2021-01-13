@@ -44,11 +44,11 @@ v=zeros(nx,nx);
 
 I=speye(nx);
 e=ones(nx,1);
-T = spdiags([e -4*e e],[-1 0 1],nx,nx);
-T(1,1)=-3;
-T(end,end)=-3;
+T1 = spdiags([e -4*e e],[-1 0 1],nx,nx);
+T1(1,1)=-3;
+T1(end,end)=-3;
 S = spdiags([e e],[-1 1],nx,nx);
-A = (kron(I,T) + kron(S,I));
+A = (kron(I,T1) + kron(S,I));
 T2=spdiags([e,-3*e,e],[-1 0 1],nx,nx);
 T2(1,1)=-2;
 T2(nx,nx)=-2;
@@ -252,6 +252,50 @@ vyy_est = mean(vyy);
 fprintf('u_{yy}(y=0) Average: %.5f\n',uyy_est);
 fprintf('v_{yy}(y=0) Average: %.5f\n',vyy_est);
 
+
+%% plotting the final pattern
+if makegif
+    fig_pos = [100 100 1000 500];
+    figfinal=figure('Position',fig_pos,'color','w');
+    numticks=4;
+    sfig1=subplot('Position',[0.11,0,0.37,1]);
+    urange=[0,4];
+    ufigfinal=imagesc(u,urange);
+    set(gca,'FontSize',23);
+    xlabel('x');
+    ylabel('y');
+    set(gca,'YDir','normal');
+    colormap('hot');
+    colorbar;
+    axis image;
+    set(sfig1,'XTick',0:(nx/numticks):nx);
+    set(sfig1,'YTick',0:(nx/numticks):nx);
+    set(sfig1,'XTickLabel',num2str((-L:2*L/numticks:L)'));
+    set(sfig1,'YTickLabel',num2str((-L:2*L/numticks:L)'));
+    xlim([0,200]);
+    ylim([0,200]);
+    title(['u, t=',num2str(T)],'FontSize',25);
+    %pbaspect([1 1 1]);
+    %ucirc=draw_circle(nx/2,nx/2,0);
+    sfig2=subplot('Position',[0.6,0,0.37,1]);
+    vfigfinal=imagesc(v, [0,1.2]);
+    set(gca,'FontSize',23);
+    xlabel('x');
+    ylabel('y');
+    set(gca,'YDir','normal');
+    colormap('hot');
+    colorbar;
+    axis image;
+    set(sfig2,'XTick',0:(nx/numticks):nx);
+    set(sfig2,'YTick',0:(nx/numticks):nx);
+    set(sfig2,'XTickLabel',num2str((-L:2*L/numticks:L)'));
+    set(sfig2,'YTickLabel',num2str((-L:2*L/numticks:L)'));
+    xlim([0,200]);
+    ylim([0,200]);
+    title('v','FontSize',25);
+    
+    saveas(figfinal,[prefix,'_final.png']);
+end
 %% saving
 
 if makegif
