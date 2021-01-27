@@ -4,5 +4,5 @@ do
 	#sed -E -i "s/^(growthrate = )0[.][0-9]+(;.*)$/\1${X}\2/g" schnackenburg_fde_2d.m
 	#screen -d -m matlab -nodisplay -nosplash -r "run('./schnackenburg_fde_2d.m');exit"
 	#screen -d -m matlab -nodisplay -nosplash -r "schnackenburg_2dfunc(${X});exit"
-	screen -d -m matlab -nodisplay -nosplash -r "schnackenberg_2dfunc(${X});exit"
+	screen -S "sch${X}" -d -m ./script_schnackenberg_helper.sh ${X}
 done
