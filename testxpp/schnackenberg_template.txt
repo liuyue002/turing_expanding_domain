@@ -1,26 +1,33 @@
 # Schnakenberg RD equation in 1D, 40 term Fourier series
 
 # parameters
-par a=0.9,b=0.1
-par gamma=1,du=1,dv=0.06
+par a=0.1,b=0.9
+par gamma=1,du=0.06,dv=1
 par L=0.5
 
 # reaction kinetics (to be generated)
 
-${KINETICS}
+u0'=a-u0+c0
+v0'=b-c0
+%[1..${N}]
+u[j]'=-u[j]*(du*([j]*pi/L)^2 +1)+c[j]
+v[j]'=-v[j]*dv*([j]*pi/L)^2-c[j]
+%
+${FOURIER_TERMS}
 
 # initial conditions
 init u0=1
-#init u[1..${N}]=0.1
-#init v[0..${N}]=0.1
+init v0=1
+init u[1..${N}]=0.1
+init v[1..${N}]=0.1
 
 # numerics options
 @ total=2000
-@ dt=0.01,nout=10
-@ nplot=3,XP=T,YP=u0,YP2=u1,YP3=vbd
+@ dt=0.0005,nout=200,bound=500
+@ nplot=3,XP=T,YP=u0,YP2=u1,YP3=ubd
 @ XLO=0,XHI=2000,YLO=0,YHI=4
 @ MAXSTOR=2000000
 @ nmax=20000,npr=5000,dsmax=0.001,ds=0.001,dsmin=0.0001,parmin=0,parmax=8
-@ autoxmin=0,autoxmax=8,autoymin=0,autoymax=5,autovar=vbd
+@ autoxmin=0,autoxmax=8,autoymin=-0.5,autoymax=5,autovar=ubd
 
 done
