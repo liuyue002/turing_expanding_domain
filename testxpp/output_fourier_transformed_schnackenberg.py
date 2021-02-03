@@ -1,42 +1,68 @@
 #!/usr/bin/env python3
 
 N=10+1
-c=['']*N
+c=['']*N #coefficients of u^2*v
+u2coef=['']*N # coefficients of u^2
 
-for n in range(0,N):
+def u(n):
+    return 'u'+str(n)
+
+def v(n):
+    return 'v'+str(n)
+
+def u2(n):
+    return 'usq'+str(n)
+
+u2coef0='u0^2+('
+for i in range(1,N):
+    u2coef0+=u(i)+'^2+'
+u2coef0=u2coef0[:-1]+')/2'
+u2coef[0]=u2coef0
+    
+for n in range(1,N):
+    u2coefn=''
+    # positive terms (correspond to cos(n+m) term)
+    for i in range(0,(n-1)//2 +1):
+        u2coefn+=u(i)+'*'+u(n-i)+'+'
+    u2coefn=u2coefn[:-1]
+    if n % 2 == 0:
+        if n > 0:
+            u2coefn+='+'
+        u2coefn+=u(n//2)+'^2/2'
+    u2coefn+='+'
+    # negative terms (correspond to cos(n-m) term)
+    for i in range(0,N-n):
+        u2coefn+=u(i)+'*'+u(n+i)+'+'
+    u2coefn='('+u2coefn[:-1]+')'
+    u2coef[n]=u2coefn
+
+c0='usq0*v0+('
+for i in range(1,N):
+    c0+=u2(i)+'*'+v(i)+'+'
+c0=c0[:-1]+')/2'
+c[0]=c0
+
+for n in range(1,N):
     cn=''
+    # positive terms (correspond to cos(n+m) term)
     for i in range(0,n+1):
-        cn+= 'v'+str(i)+'*('
-        if n-i > 0:
-            cn += '2*('
-            for j in range(0,(n-i-1)//2 +1):
-                cn+='u'+str(j)+'*u'+str(n-i-j)+'+'
-            cn=cn[:-1]
-            cn+=')'
-        if (n-i) % 2 == 0:
-            if n-i > 0:
-                cn+='+'
-            cn+='u'+str((n-i)//2)+'^2'
-        cn+=')+'
-    cn=cn[:-1]
+        cn+=v(i)+'*'+u2(n-i)+'+'
+    # negative terms (correspond to cos(n-m) term)
+    for i in range(0,N-n):
+        cn+=v(i)+'*'+u2(n+i)+'+'+v(n+i)+'*'+u2(i)+'+'
+    cn='('+cn[:-1]+')/2'
     c[n]=cn
+    
 
 kinetics=''
-
-kinetics +='c0='+c[0]+'\n'
-#kinetics +='u0\'=a-u0+c0\n'
-#kinetics +='v0\'=b-c0\n'
-for n in range(1,N):
+for n in range(0,N):
+    kinetics +='usq'+str(n)+'='+u2coef[n]+'\n'
     kinetics +='c'+str(n)+'='+c[n]+'\n'
-#    ueqn='u'+str(n)+'\'='+'-u'+str(n)+'*('+str(n**2)+'*(pi^2)*du'+'/(L^2) +1)+'+'c'+str(n)
-#    kinetics +=ueqn+'\n'
-#    veqn='v'+str(n)+'\'='+'-v'+str(n)+'*'+str(n**2)+'*(pi^2)*dv'+'/(L^2)'+'-c'+str(n)
-#    kinetics +=veqn+'\n'
-#ubd='aux ubd='
-#for n in range(0,N):
-#    ubd+='u'+str(n)+'+'
-#ubd=ubd[:-1]
-#kinetics += ubd
+ubd='aux ubd='
+for n in range(0,N):
+    ubd+='u'+str(n)+'+'
+ubd=ubd[:-1]
+kinetics += ubd
         
 with open('schnackenberg_template.txt','r') as f2:
     template=f2.read()
