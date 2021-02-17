@@ -5,3 +5,8 @@ papers
 *.m~
 *.asv
 oldstuff
+testxpp/*.gif
+testxpp/*.png
+testxpp/*.fig
+testxpp/*.dat
+testxpp/bif_plots_barrass_param

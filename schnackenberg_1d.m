@@ -1,9 +1,9 @@
 clear;clc;close all;
 
 %% options
-makegif=0;
+makegif=1;
 showanimation=1;
-kymograph=0;
+kymograph=1;
 drawperframe=100;
 L=100; % half-domain size
 nx=200;
@@ -188,4 +188,5 @@ if kymograph
     v_kymograph = plot_kymograph(vv, kymograph_pos,T,[-L,L],'v');
     saveas(u_kymograph,[prefix,'_ukymograph.png']);
     saveas(v_kymograph,[prefix,'_vkymograph.png']);
+    save([prefix,'.mat'],'uu','vv', '-mat','-append');
 end
