@@ -6,12 +6,12 @@ showanimation=1;
 kymograph=1;
 drawperframe=100;
 L=100; % half-domain size
-nx=200;
+nx=600;
 dx=2*L/nx;
-growthrate = 0.1; % bif, 0.05 to 0.75
+growthrate = 0.75; % bif, 0.05 to 0.75
 %T=400;
 T=200/growthrate + 100;
-dt=0.01;
+dt=0.005;
 nt=T/dt+1;
 nFrame=ceil((T/dt)/drawperframe);
 
@@ -22,8 +22,9 @@ b = 1.4;
 Du = 1;
 Dv = 20;
 Wmax = 1.0; %1.0
-%W=@(x,t) Wmax*heaviside(x-(-80+growthrate*max(t-50,0)));
-W=@(x,t) ones(size(x))*0;
+effectiveL = @(t) min(5+ growthrate*max(t-50,0), 2*L);
+W=@(x,t) Wmax*heaviside(x-(-100+effectiveL(t)));
+%W=@(x,t) ones(size(x))*0;
 
 uyy_est = -0.0; % -0.28810;
 vyy_est =  0.0; %  0.06471;
@@ -95,6 +96,10 @@ if kymograph
     vv=zeros(nFrame,nx);
 end
 
+ubdval = zeros(nFrame,1); %keep track of u(0) at left boundary
+uL2 = zeros(nFrame,1); %keep track of L2-norm of u on the effective domain
+effectiveLs = zeros(nFrame,1); %keep track of effective domain length
+
 %% simulation iteration
 th=0.5; % 0: fw euler, 0.5: Crank-Nicosen, 1: bw euler
 Tu=speye(nx)-th*dt*Du*A;
@@ -108,7 +113,7 @@ for ti=1:1:nt
             vfig.YData=v;
             Wval=W(x,t);
             wfig.YData=Wval;
-            figtitle.String=['t=',num2str(t)];
+            figtitle.String=['t=',num2str(t,'%.1f')];
             drawnow;
         end
         iFrame=(ti-1)/drawperframe+1;
@@ -126,6 +131,10 @@ for ti=1:1:nt
             uu(iFrame,:)=u;
             vv(iFrame,:)=v;
         end
+        ubdval(iFrame)=u(1);
+        xind=min(ceil(effectiveL(t)/dx),nx); % index of meshpoint corresponding to right boundary of effective domain
+        uL2(iFrame)=sqrt(sum(u(1:xind).^2)/xind);
+        effectiveLs(iFrame)=effectiveL(t);
     end
     
     fvec=f(u,v,x,t);
@@ -180,7 +189,7 @@ fprintf('v_{xx} Averaged on valleys: %.5f\n',vxx_valy);
 if makegif
     ufinal = u;
     vfinal = v;
-    save([prefix,'.mat'],'ufinal','vfinal','uavg','uamp','vavg','vamp','est_period','uxx_peaks','vxx_peaks','uxx_valy','vxx_valy', '-mat','-append');
+    save([prefix,'.mat'],'ufinal','vfinal','ubdval','uL2','effectiveLs','uavg','uamp','vavg','vamp','est_period','uxx_peaks','vxx_peaks','uxx_valy','vxx_valy', '-mat','-append');
 end
 if kymograph
     kymograph_pos = [100,100,650,500];

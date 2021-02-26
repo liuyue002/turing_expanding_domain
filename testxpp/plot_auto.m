@@ -1,6 +1,7 @@
 addpath('./mdepitta');
 N=20;
 databd = readbd(['schnackenberg_fourier_N=',num2str(N),'.dat']);
+unorm = "L2"; % "boundary" or "L2" or "W12"
 
 %% plot all orbit
 % dat=databd.pts{1,i} contains a single traced branch
@@ -19,27 +20,75 @@ databd = readbd(['schnackenberg_fourier_N=',num2str(N),'.dat']);
 
 fig=figure;
 hold on
-for i=1:size(databd.pts,2)
-dat=databd.pts{1,i};
-type=databd.type{1,i};
-if strcmp(type,"ue")
-    stability = '-k';
-elseif strcmp(type,"se")
-    stability = '-r';
-else
-    fprintf('Unknown type: %s\n',type);
-    continue;
+for datind=1:size(databd.pts,2)
+    dat=databd.pts{1,datind};
+    type=databd.type{1,datind};
+    if strcmp(type,"ue")
+        stability = '-k';
+    elseif strcmp(type,"se")
+        stability = '-r';
+    else
+        fprintf('Unknown type: %s\n',type);
+        continue;
+    end
+    
+    bifparam=dat(:,4);
+    if unorm=="boundary"
+        usum=sum(dat(:,7:2:7+N*2),2); % this is u(0)
+        line=plot(bifparam,usum,stability);
+    elseif unorm=="L2"
+        L2norm=zeros(size(dat,1),1);
+        nx=200;
+        for i=1:size(dat,1)
+            L=bifparam(i);
+            coefs=dat(i,7:2:7+N*2);
+            x=linspace(0,L,nx);
+            u=zeros(1,nx);
+            for n=0:N
+                u=u+coefs(n+1)*cos((n*pi/L)*x);
+            end
+            L2norm(i)=sqrt(sum(u.^2)/nx);
+        end
+        line=plot(bifparam,L2norm,stability);
+    else
+        %unorm=="W12"
+        W12norm=zeros(size(dat,1),1);
+        nx=200;
+        for i=1:size(dat,1)
+            L=bifparam(i);
+            coefs=dat(i,7:2:7+N*2);
+            x=linspace(0,L,nx);
+            u=zeros(1,nx);
+            uder=zeros(1,nx);
+            for n=0:N
+                u=u+coefs(n+1)*cos((n*pi/L)*x);
+                uder=uder-coefs(n+1)*(n*pi/L)*sin((n*pi/L)*x);
+            end
+            W12norm(i)=sqrt((sum(u.^2)+sum(uder.^2))/nx);
+        end
+        line=plot(bifparam,W12norm,stability);
+    end
+    
+    %line.Color = [line.Color, 0.2]; % make it more transparent
 end
 
-bifparam=dat(:,4);
-usum=sum(dat(:,7:2:7+N*2),2);
-line=plot(bifparam,usum,stability);
-%line.Color = [line.Color, 0.2]; % make it more transparent
-end
 xlabel('L');
-ylabel('u(0)');
-xlim([0,50]);
-ylim([0,3]);
+if unorm=="boundary"
+    ylabel('u(0)');
+    xlim([0,50]);
+    ylim([0,3]);
+elseif unorm=="L2"
+    ylabel('||u||_2 /L');
+    xlim([0,50]);
+    ylim([1.4,1.7]);
+else
+    %unorm=="W12"
+    ylabel('||u||_{1,2} /L');
+    xlim([0,50]);
+    ylim([1.4,1.7]);
+end
+
 title(['N=',num2str(N)]);
 hold off
-%saveas(fig,['schnackenberg_fourier_auto_N=',num2str(N),'.png']);
+saveas(fig,strcat('schnackenberg_fourier_auto_N=',num2str(N),'_unorm=',unorm,'.png'));
+
