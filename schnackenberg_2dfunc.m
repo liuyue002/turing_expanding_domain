@@ -29,7 +29,7 @@ Dv = 20;
 Wmax = 1.0; %1.0
 wid=L+10; % put L+10 for full-sized domain to avoid annoying boundary issue
 if growthrate == 0
-    rho=@(t) L;
+    rho=@(t) L+10;
     W=@(x,y,t) ones(size(x))*0;
 else
     rho=@(t) -0.8*L+growthrate*max(t-50,0);
@@ -102,13 +102,16 @@ end
 giffile = [prefix,'.gif'];
 giffile_horiz = [prefix,'_horizcrossec.gif'];
 giffile_vert = [prefix,'_vertcrossec.gif'];
+urange=[0,4];
+vrange=[0,1.2];
+
 if showanimation
     fig_pos = [100 100 1650 500];
     fig=figure('Position',fig_pos,'color','w');
     numticks=10;
+    
     sfig1=subplot('Position',[0.04,0,0.28,1]);
     hold on
-    urange=[0,4];
     ufig=imagesc(u,urange);
     Wline=plot([(rho(0)+L)/dx,(rho(0)+L)/dx],[0,nx],'-b');
     xlabel('x');
@@ -126,8 +129,9 @@ if showanimation
     utitle=title('u, t=0');
     hold off
     pbaspect([1 1 1]);
+    
     sfig2=subplot('Position',[0.37,0,0.28,1]);
-    vfig=imagesc(v, [0,1.2]);
+    vfig=imagesc(v, vrange);
     xlabel('x');
     ylabel('y');
     set(gca,'YDir','normal');
@@ -142,9 +146,10 @@ if showanimation
     ylim([0,200]);
     title('v');
     pbaspect([1 1 1]);
+    
     sfig3=subplot('Position',[0.70,0,0.28,1]);
     Wval=W(X,Y,0);
-    Wfig=imagesc(Wval,[0, 1]); %[0,Wmax]
+    Wfig=imagesc(Wval,[0, Wmax]);
     xlabel('x');
     ylabel('y');
     set(gca,'YDir','normal');
@@ -267,19 +272,25 @@ fprintf('v_{yy}(y=0) Average: %.5f\n',vyy_est);
 
 %% plotting the final pattern
 if makegif
+    fig_pos_square = [100 100 500 500];
     fig_pos = [100 100 610 500];
     numticks=4;
     
-    ufigfinal=figure('Position',fig_pos,'color','w');
-    urange=[0,4];
+    ufigfinal=figure('Position',fig_pos_square,'color','w');
     imagesc(u,urange);
+    set(gca,'YDir','normal');
+    axis image;
+    colormap('hot');
+    set(gca,'XTickLabel',[]);
+    set(gca,'YTickLabel',[]);
+    set(gca,'LooseInset',get(gca,'TightInset'));
+    saveas(ufigfinal,[prefix,'_ufinal_tight.png']);
+    
+    ufigfinal.Position=fig_pos;
     set(gca,'FontSize',23);
     xlabel('x');
     ylabel('y');
-    set(gca,'YDir','normal');
-    colormap('hot');
     colorbar;
-    axis image;
     set(gca,'XTick',0:(nx/numticks):nx);
     set(gca,'YTick',0:(nx/numticks):nx);
     set(gca,'XTickLabel',num2str((-L:2*L/numticks:L)'));
@@ -287,16 +298,24 @@ if makegif
     xlim([0,200]);
     ylim([0,200]);
     title(['u, t=',num2str(T)],'FontSize',25);
+    saveas(ufigfinal,[prefix,'_ufinal.png']);
+    saveas(ufigfinal,[prefix,'_ufinal.fig']);
     
-    vfigfinal=figure('Position',fig_pos,'color','w');
-    imagesc(v, [0,1.2]);
+    vfigfinal=figure('Position',fig_pos_square,'color','w');
+    imagesc(v, vrange);
+    set(gca,'YDir','normal');
+    axis image;
+    colormap('hot');
+    set(gca,'XTickLabel',[]);
+    set(gca,'YTickLabel',[]);
+    set(gca,'LooseInset',get(gca,'TightInset'));
+    saveas(vfigfinal,[prefix,'_vfinal_tight.png']);
+    
+    vfigfinal.Position=fig_pos;
     set(gca,'FontSize',23);
     xlabel('x');
     ylabel('y');
-    set(gca,'YDir','normal');
-    colormap('hot');
     colorbar;
-    axis image;
     set(gca,'XTick',0:(nx/numticks):nx);
     set(gca,'YTick',0:(nx/numticks):nx);
     set(gca,'XTickLabel',num2str((-L:2*L/numticks:L)'));
@@ -304,9 +323,6 @@ if makegif
     xlim([0,200]);
     ylim([0,200]);
     title('v','FontSize',25);
-    
-    saveas(ufigfinal,[prefix,'_ufinal.png']);
-    saveas(ufigfinal,[prefix,'_ufinal.fig']);
     saveas(vfigfinal,[prefix,'_vfinal.png']);
     saveas(vfigfinal,[prefix,'_vfinal.fig']);
 end
