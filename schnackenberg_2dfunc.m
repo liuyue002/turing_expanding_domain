@@ -9,29 +9,40 @@ L=100; % half-domain size
 nx=200;
 dx=2*L/nx;
 %growthrate = 0.1; % bif, 0.05 to 0.75
-%T=200/growthrate + 100;
-T=400;
+if growthrate == 0
+    T=200;
+else
+    T=200/growthrate + 100;
+end
 dt=0.01;
 nt=T/dt+1;
+sympref('HeavisideAtOrigin',0);
 
 %% parameters
+% mine: 1, 0.05, 1.4, 1, 20
+% leah: 0.2, 0.2, 2.0, 0.01, 1
 gamma = 1.0;
 a = 0.05;
-b = 1.6;
+b = 1.4;
 Du = 1;
 Dv = 20;
 Wmax = 1.0; %1.0
-wid=10; % L
-%W=@(x,y,t) Wmax*(1-heaviside(-x+(-80+growthrate*max(t-50,0))).*heaviside(y+wid).*heaviside(-y+wid));
-W=@(x,y,t) ones(size(x))*0;
+wid=L+10; % put L+10 for full-sized domain to avoid annoying boundary issue
+if growthrate == 0
+    rho=@(t) L;
+    W=@(x,y,t) ones(size(x))*0;
+else
+    rho=@(t) -0.8*L+growthrate*max(t-50,0);
+    W=@(x,y,t) Wmax*(1-heaviside(-x+rho(t)).*heaviside(y+wid).*heaviside(-y+wid));
+end
 
 %% reaction
 f = @(u,v,x,y,t) gamma * (a + W(x,y,t) - u + (u.^2).*v);
 g = @(u,v,x,y,t) gamma * (b - (u.^2).*v);
 u0 = a+Wmax+b;
 v0 = b/(u0^2);
-noisestrength = 0.0; %0.01
-fprintf('Equilibrium: u0=%.5f, v0=%.5f\n',u0,v0);
+noisestrength = 0; %0.01
+fprintf('Equilibrium outside of effective domain: u0=%.5f, v0=%.5f\n',u0,v0);
 
 %% FDM setup
 x=linspace(-L,L,nx)';
@@ -75,7 +86,7 @@ if noisestrength == 0
 else
     noisetext='noisy_';
 end
-if wid == L
+if wid >= L
     widthtext='';
 else
     widthtext=['narrow_wid=', num2str(wid),'_'];
@@ -96,8 +107,10 @@ if showanimation
     fig=figure('Position',fig_pos,'color','w');
     numticks=10;
     sfig1=subplot('Position',[0.04,0,0.28,1]);
+    hold on
     urange=[0,4];
     ufig=imagesc(u,urange);
+    Wline=plot([(rho(0)+L)/dx,(rho(0)+L)/dx],[0,nx],'-b');
     xlabel('x');
     ylabel('y');
     set(gca,'YDir','normal');
@@ -111,8 +124,8 @@ if showanimation
     xlim([0,200]);
     ylim([0,200]);
     utitle=title('u, t=0');
-    %pbaspect([1 1 1]);
-    %ucirc=draw_circle(nx/2,nx/2,0);
+    hold off
+    pbaspect([1 1 1]);
     sfig2=subplot('Position',[0.37,0,0.28,1]);
     vfig=imagesc(v, [0,1.2]);
     xlabel('x');
@@ -128,7 +141,7 @@ if showanimation
     xlim([0,200]);
     ylim([0,200]);
     title('v');
-    %pbaspect([1 1 1]);
+    pbaspect([1 1 1]);
     sfig3=subplot('Position',[0.70,0,0.28,1]);
     Wval=W(X,Y,0);
     Wfig=imagesc(Wval,[0, 1]); %[0,Wmax]
@@ -145,7 +158,7 @@ if showanimation
     xlim([0,200]);
     ylim([0,200]);
     title('W');
-    %pbaspect([1 1 1]);
+    pbaspect([1 1 1]);
     
     crosssec_fig_pos=[100,100,600,500];
     fig_horiz=figure('Position',crosssec_fig_pos,'color','w');
@@ -181,8 +194,7 @@ for ti=1:1:nt
             ufig.CData=u;
             vfig.CData=v;
             utitle.String=['u, t=',num2str(t)];
-            %update_circle(ucirc,nx/2,nx/2,radius(t) * (nx/(2*L)));
-            %update_circle(vcirc,nx/2,nx/2,radius(t) * (nx/(2*L)));
+            Wline.XData=[(rho(t)+L)/dx,(rho(t)+L)/dx];
             Wval=W(X,Y,t);
             Wfig.CData=Wval;
             
@@ -294,7 +306,9 @@ if makegif
     title('v','FontSize',25);
     
     saveas(ufigfinal,[prefix,'_ufinal.png']);
+    saveas(ufigfinal,[prefix,'_ufinal.fig']);
     saveas(vfigfinal,[prefix,'_vfinal.png']);
+    saveas(vfigfinal,[prefix,'_vfinal.fig']);
 end
 %% saving
 
