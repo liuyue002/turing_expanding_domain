@@ -5,3 +5,5 @@ papers
 *.m~
 *.asv
 oldstuff
+*.auto
+*.dat

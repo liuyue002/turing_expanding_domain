@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-N=10+1
+N=20+1
 c=['']*N #coefficients of u^2*v
 u2coef=['']*N # coefficients of u^2
 
@@ -12,6 +12,7 @@ def v(n):
 
 def u2(n):
     return 'usq'+str(n)
+    #return '('+u2coef[n]+')'
 
 u2coef0='u0^2+('
 for i in range(1,N):
@@ -36,7 +37,7 @@ for n in range(1,N):
     u2coefn='('+u2coefn[:-1]+')'
     u2coef[n]=u2coefn
 
-c0='usq0*v0+('
+c0=u2(0)+'*v0+('
 for i in range(1,N):
     c0+=u2(i)+'*'+v(i)+'+'
 c0=c0[:-1]+')/2'
@@ -56,7 +57,8 @@ for n in range(1,N):
 
 kinetics=''
 for n in range(0,N):
-    kinetics +='usq'+str(n)+'='+u2coef[n]+'\n'
+    kinetics +='usq'+str(n)+'=('+u2coef[n]+')\n'
+for n in range(0,N):
     kinetics +='c'+str(n)+'='+c[n]+'\n'
 ubd='aux ubd='
 for n in range(0,N):
