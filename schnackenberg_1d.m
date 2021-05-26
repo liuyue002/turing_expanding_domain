@@ -1,14 +1,14 @@
 clear;clc;close all;
 
 %% options
-makegif=0;
+makegif=1;
 showanimation=1;
-kymograph=0;
+kymograph=1;
 drawperframe=100;
 L=100; % half-domain size
-nx=400;
+nx=600;
 dx=2*L/nx;
-growthrate = 2; % bif, 0.05 to 0.75
+growthrate = 0.75; % bif, 0.05 to 0.75
 if growthrate == 0
     T=200;
 else
@@ -28,12 +28,15 @@ Dv = 20;
 Wmax = 1.0; %1.0
 if growthrate == 0
     rho=@(t) L+10; % put L+10 for full-sized domain to avoid annoying boundary issue
+    effectiveL = @(t) L;
     W=@(x,t) ones(size(x))*0;
     Wmax=0;
 else
     rho=@(t) -0.8*L+growthrate*max(t-50,0);
+    effectiveL = @(t) min(L+rho(t),2*L);
     W=@(x,t) Wmax*heaviside(x-rho(t));
 end
+=======
 
 uyy_est = -0.0; % -0.28810;
 vyy_est =  0.0; %  0.06471;
@@ -41,9 +44,11 @@ vyy_est =  0.0; %  0.06471;
 %% reaction
 f = @(u,v,x,t) gamma * (a + W(x,t) - u + (u.^2).*v) + Du*uyy_est;
 g = @(u,v,x,t) gamma * (b - (u.^2).*v) + Dv*vyy_est;
-u0 = a+Wmax+b+Du\gamma*uyy_est+Dv\gamma*vyy_est;
-v0 = (b+Dv\gamma*vyy_est)/(u0^2);
-noisestrength = 0.01;
+aeff=a+Wmax+(Du/gamma)*uyy_est;
+beff=b+(Dv/gamma)*vyy_est;
+u0 = aeff+beff;
+v0 = beff/(u0^2);
+noisestrength = 0;
 fprintf('Equilibrium: u0=%.5f, v0=%.5f\n',u0,v0);
 
 %% FDM setup
@@ -111,6 +116,10 @@ if kymograph
     vv=zeros(nFrame,nx);
 end
 
+ubdval = zeros(nFrame,1); %keep track of u(0) at left boundary
+uL2 = zeros(nFrame,1); %keep track of L2-norm of u on the effective domain
+effectiveLs = zeros(nFrame,1); %keep track of effective domain length
+
 %% simulation iteration
 th=0.5; % 0: fw euler, 0.5: Crank-Nicosen, 1: bw euler
 Tu=speye(nx)-th*dt*Du*A;
@@ -124,7 +133,7 @@ for ti=1:1:nt
             vfig.YData=v;
             Wval=W(x,t);
             wfig.YData=Wval;
-            figtitle.String=['t=',num2str(t)];
+            figtitle.String=['t=',num2str(t,'%.1f')];
             drawnow;
         end
         iFrame=(ti-1)/drawperframe+1;
@@ -142,6 +151,10 @@ for ti=1:1:nt
             uu(iFrame,:)=u;
             vv(iFrame,:)=v;
         end
+        ubdval(iFrame)=u(1);
+        xind=min(ceil(effectiveL(t)/dx),nx); % index of meshpoint corresponding to right boundary of effective domain
+        uL2(iFrame)=sqrt(sum(u(1:xind).^2)/xind);
+        effectiveLs(iFrame)=effectiveL(t);
     end
     
     fvec=f(u,v,x,t);
@@ -196,7 +209,7 @@ fprintf('v_{xx} Averaged on valleys: %.5f\n',vxx_valy);
 if makegif
     ufinal = u;
     vfinal = v;
-    save([prefix,'.mat'],'ufinal','vfinal','uavg','uamp','vavg','vamp','est_period','uxx_peaks','vxx_peaks','uxx_valy','vxx_valy', '-mat','-append');
+    save([prefix,'.mat'],'ufinal','vfinal','ubdval','uL2','effectiveLs','uavg','uamp','vavg','vamp','est_period','uxx_peaks','vxx_peaks','uxx_valy','vxx_valy', '-mat','-append');
 end
 if kymograph
     kymograph_pos = [100,100,650,500];
@@ -204,4 +217,5 @@ if kymograph
     v_kymograph = plot_kymograph(vv, kymograph_pos,T,[-L,L],'v');
     saveas(u_kymograph,[prefix,'_ukymograph.png']);
     saveas(v_kymograph,[prefix,'_vkymograph.png']);
+    save([prefix,'.mat'],'uu','vv', '-mat','-append');
 end
