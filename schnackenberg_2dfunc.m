@@ -12,7 +12,7 @@ dx=2*L/nx;
 if growthrate == 0
     T=200;
 else
-    T=200/growthrate + 100;
+    T=200/growthrate + 150;
 end
 dt=0.01;
 nt=T/dt+1;
@@ -23,7 +23,7 @@ sympref('HeavisideAtOrigin',0);
 % leah: 0.2, 0.2, 2.0, 0.01, 1
 gamma = 1.0;
 a = 0.05;
-b = 1.4;
+b = 1.6;
 Du = 1;
 Dv = 20;
 Wmax = 1.0; %1.0
@@ -31,8 +31,10 @@ wid=L+10; % put L+10 for full-sized domain to avoid annoying boundary issue
 if growthrate == 0
     rho=@(t) L+10;
     W=@(x,y,t) ones(size(x))*0;
+    Wmax=0;
 else
-    rho=@(t) -0.8*L+growthrate*max(t-50,0);
+    %rho=@(t) -0.8*L+growthrate*max(t-50,0);
+    rho=@(t) -L+growthrate*t;
     W=@(x,y,t) Wmax*(1-heaviside(-x+rho(t)).*heaviside(y+wid).*heaviside(-y+wid));
 end
 
@@ -71,10 +73,10 @@ A = A/(dx^2);
 u(:)=u0;
 u = u + (rand(size(u))*0.6-0.3);
 %u = rand(size(u))*3;
-%q=2*pi*0.09;
-%u = 1.64 + 0.70*cos(q*Y);
+%q=0.5655;
+%u = 1.45 + 0.98*cos(q*Y);
 v(:)=v0;
-%v = 0.60 - 0.13*cos(q*Y);
+%v = 0.65 - 0.20*cos(q*Y);
 
 if ispc % is windows
     folder='D:\liuyueFolderOxford1\turingpattern\simulations\';
@@ -95,15 +97,17 @@ ictext = 'hssinit_'; % 'hssinit_' or 'wavyinit_'
 prefix = strcat('schnackenberg_2d_',noisetext,widthtext,ictext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate) );
 prefix = strcat(folder, prefix);
 if makegif
-    save([prefix,'.mat'], '-mat');
+    uinit=u;
+    vinit=v;
+    save([prefix,'.mat'],'-mat');
 end
 
 %% Set up figure
 giffile = [prefix,'.gif'];
 giffile_horiz = [prefix,'_horizcrossec.gif'];
 giffile_vert = [prefix,'_vertcrossec.gif'];
-urange=[0,4];
-vrange=[0,1.2];
+urange=[0,3];
+vrange=[0,1];
 
 if showanimation
     fig_pos = [100 100 1650 500];
@@ -149,7 +153,11 @@ if showanimation
     
     sfig3=subplot('Position',[0.70,0,0.28,1]);
     Wval=W(X,Y,0);
-    Wfig=imagesc(Wval,[0, Wmax]);
+    if Wmax > 0
+        Wfig=imagesc(Wval,[0, Wmax]);
+    else
+        Wfig=imagesc(Wval,[0,1]);
+    end
     xlabel('x');
     ylabel('y');
     set(gca,'YDir','normal');

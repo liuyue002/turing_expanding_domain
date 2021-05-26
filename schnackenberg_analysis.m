@@ -2,13 +2,15 @@
 syms u v q q2
 gamma = 1;
 a = 0.05;
-b = 1.4;
+b = 1.6;
 du = 1;
 dv = 20;
 W=0.0;
 alpha=0;
-uyy_est = -0.28810;
-vyy_est =  0.06471;
+%uyy_est = -0.28810;
+uyy_est=0;
+%vyy_est =  0.06471;
+vyy_est=0;
 a_eff = a + alpha*du*uyy_est/gamma +W;
 b_eff = b + alpha*dv*vyy_est/gamma;
 f = gamma * (a_eff -u+u^2 *v );
@@ -40,7 +42,7 @@ disp(double(q2min));
 
 %% plot real part of dominant eigenvalue against q
 M2 = Jwm-D*q^2;
-qval = linspace(0,2,500);
+qval = linspace(0,1.5,500);
 eigM = eig(subs(M2, [u,v], [u0,v0]));
 eigenreal = max(real(double(subs(eigM,q,qval))),[],1);
 fig=figure;
@@ -53,3 +55,5 @@ ylim([-1,1]);
 
 [eigenmax,maxind] = max(eigenreal);
 fprintf('Max eigenvalue occurs at q = %.3f, corresponding period %.3f\n', qval(maxind), 2*pi/qval(maxind));
+
+

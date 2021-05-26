@@ -11,7 +11,7 @@ dx=2*L/nx;
 if growthrate == 0
     T=100;
 else
-    T=200/growthrate + 80;
+    T=200/growthrate + 100;
 end
 dt=0.01;
 nt=T/dt+1;
@@ -28,8 +28,9 @@ wid=L+10; % put L+10 for full-sized domain to avoid annoying boundary issue
 if growthrate == 0
     rho=@(t) L+10;
     W=@(x,y,t) ones(size(x))*0;
+    Wmax=0;
 else
-    rho=@(t) -0.8*L+growthrate*max(t-20,0);
+    rho=@(t) -0.8*L+growthrate*t;
     W=@(x,y,t) Wmax*(1-heaviside(-x+rho(t)).*heaviside(y+wid).*heaviside(-y+wid));
 end
 
@@ -68,10 +69,10 @@ A = A/(dx^2);
 u(:)=u0;
 u = u + (rand(size(u))*0.6-0.3);
 %u = rand(size(u))*3;
-%q=2*pi*0.09;
-%u = 1.64 + 0.70*cos(q*Y);
+%q=0.911;
+%u = 2.405 + 1.156*cos(q*Y);
 v(:)=v0;
-%v = 0.60 - 0.13*cos(q*Y);
+%v = 6.668 + 0.709*cos(q*Y);
 
 if ispc % is windows
     folder='D:\liuyueFolderOxford1\turingpattern\simulations\';

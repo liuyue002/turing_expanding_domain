@@ -3,7 +3,7 @@ syms u v b q q2
 a = 12;
 d = 1;
 sigma = 50;
-W = 1.5;
+W = 0;
 f = a-u-4*u*v/(1+u^2) -W;
 g = sigma*b*(u - u*v/(1+u^2) +W);
 u0 = (a-5*W)/5;
@@ -17,7 +17,7 @@ disp(eig(double(subs(Jwm, [u,v,b], [u0,v0,0.3]))));
 %% Turing analysis
 D = [1,0; 0, d*sigma];
 M = Jwm-D*q2;
-detM = det(subs(M, [u,v,b], [u0,v0,0.3]));
+detM = det(subs(M, [u,v,b], [u0,v0,0.31]));
 coefs = coeffs(diff(detM, q2));
 q2min = -coefs(1)/coefs(2); % q2min where the det is at minimum
 disp(q2min);

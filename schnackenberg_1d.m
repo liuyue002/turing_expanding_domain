@@ -6,14 +6,18 @@ showanimation=1;
 kymograph=0;
 drawperframe=100;
 L=100; % half-domain size
-nx=200;
+nx=400;
 dx=2*L/nx;
-growthrate = 0.1; % bif, 0.05 to 0.75
-%T=400;
-T=200/growthrate + 100;
+growthrate = 2; % bif, 0.05 to 0.75
+if growthrate == 0
+    T=200;
+else
+    T=200/growthrate + 100;
+end
 dt=0.01;
 nt=T/dt+1;
 nFrame=ceil((T/dt)/drawperframe);
+sympref('HeavisideAtOrigin',0);
 
 %% parameters
 gamma = 1.0;
@@ -22,8 +26,14 @@ b = 1.4;
 Du = 1;
 Dv = 20;
 Wmax = 1.0; %1.0
-%W=@(x,t) Wmax*heaviside(x-(-80+growthrate*max(t-50,0)));
-W=@(x,t) ones(size(x))*0;
+if growthrate == 0
+    rho=@(t) L+10; % put L+10 for full-sized domain to avoid annoying boundary issue
+    W=@(x,t) ones(size(x))*0;
+    Wmax=0;
+else
+    rho=@(t) -0.8*L+growthrate*max(t-50,0);
+    W=@(x,t) Wmax*heaviside(x-rho(t));
+end
 
 uyy_est = -0.0; % -0.28810;
 vyy_est =  0.0; %  0.06471;
@@ -33,7 +43,7 @@ f = @(u,v,x,t) gamma * (a + W(x,t) - u + (u.^2).*v) + Du*uyy_est;
 g = @(u,v,x,t) gamma * (b - (u.^2).*v) + Dv*vyy_est;
 u0 = a+Wmax+b+Du\gamma*uyy_est+Dv\gamma*vyy_est;
 v0 = (b+Dv\gamma*vyy_est)/(u0^2);
-noisestrength = 0;
+noisestrength = 0.01;
 fprintf('Equilibrium: u0=%.5f, v0=%.5f\n',u0,v0);
 
 %% FDM setup
@@ -49,7 +59,8 @@ A=A/(dx^2);
 
 %% initial condition
 u(:)=u0;
-u = u + (rand(size(u))*0.6-0.3);
+u(1)=2*u0;
+%u = u + (rand(size(u))*0.6-0.3);
 %u = rand(size(u))*3;
 %q=0.8;
 %u = 1.5 + cos(q*Y);
@@ -60,12 +71,17 @@ if ispc % is windows
 else % is linux
     folder='/home/liuy1/Documents/turingpattern/simulations/';
 end
+if noisestrength == 0
+    noisetext='nonoise_';
+else
+    noisetext='noisy_';
+end
 if uyy_est==0 && vyy_est==0
     uyytext = '';
 else
     uyytext = 'uyyAdjusted_';
 end
-prefix = strcat('schnackenberg_1d_',uyytext , datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate) );
+prefix = strcat('schnackenberg_1d_',uyytext ,noisetext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate) );
 prefix = strcat(folder, prefix);
 if makegif
     save([prefix,'.mat'], '-mat');
