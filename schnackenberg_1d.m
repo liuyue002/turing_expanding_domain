@@ -32,8 +32,10 @@ vyy_est =  0.0; %  0.06471;
 %% reaction
 f = @(u,v,x,t) gamma * (a + W(x,t) - u + (u.^2).*v) + Du*uyy_est;
 g = @(u,v,x,t) gamma * (b - (u.^2).*v) + Dv*vyy_est;
-u0 = a+Wmax+b+Du\gamma*uyy_est+Dv\gamma*vyy_est;
-v0 = (b+Dv\gamma*vyy_est)/(u0^2);
+aeff=a+Wmax+(Du/gamma)*uyy_est;
+beff=b+(Dv/gamma)*vyy_est;
+u0 = aeff+beff;
+v0 = beff/(u0^2);
 noisestrength = 0;
 fprintf('Equilibrium: u0=%.5f, v0=%.5f\n',u0,v0);
 
