@@ -21,7 +21,7 @@ format = cell(size(xTickLabel));
 format(:)={'%.0f'};
 xTickLabel=cellfun(@num2str,xTickLabel,format,'un',0);
 
-fig=figure('Position',fig_pos);
+fig=figure('Position',fig_pos,'color','w');
 axis([0 nFrame 0 nx]);
 umax=max(max(uu(10:end,:)));
 umax=ceil(umax*10)/10;

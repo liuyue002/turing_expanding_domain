@@ -36,7 +36,6 @@ else
     effectiveL = @(t) min(L+rho(t),2*L);
     W=@(x,t) Wmax*heaviside(x-rho(t));
 end
-=======
 
 uyy_est = -0.0; % -0.28810;
 vyy_est =  0.0; %  0.06471;
@@ -114,6 +113,7 @@ end
 if kymograph
     uu=zeros(nFrame,nx);
     vv=zeros(nFrame,nx);
+    peakslocation=NaN(nFrame,30);%there probably won't be more than 30 peaks
 end
 
 ubdval = zeros(nFrame,1); %keep track of u(0) at left boundary
@@ -150,6 +150,8 @@ for ti=1:1:nt
         if kymograph
             uu(iFrame,:)=u;
             vv(iFrame,:)=v;
+            [~,peaklocindex]=findpeaks(u,'MinPeakProminence',0.1);
+            peakslocation(iFrame,1:length(peaklocindex))=x(peaklocindex);
         end
         ubdval(iFrame)=u(1);
         xind=min(ceil(effectiveL(t)/dx),nx); % index of meshpoint corresponding to right boundary of effective domain
@@ -217,5 +219,21 @@ if kymograph
     v_kymograph = plot_kymograph(vv, kymograph_pos,T,[-L,L],'v');
     saveas(u_kymograph,[prefix,'_ukymograph.png']);
     saveas(v_kymograph,[prefix,'_vkymograph.png']);
-    save([prefix,'.mat'],'uu','vv', '-mat','-append');
+    
+    
+    peaklocfig=figure('Position',[100 100 900 750],'color','w');
+    ts=0:drawperframe*dt:T;
+    hold on
+    for i=1:size(peakslocation,2)
+        plot(ts,peakslocation(:,i),'.k');
+    end
+    xlim([0,T]);
+    ylim([-L,L]);
+    xlabel('t');
+    ylabel('peaks of u');
+    biggerFont(gca);
+    tightEdge(gca);
+    saveas(peaklocfig,[prefix,'_peakloc.png']);
+    
+    save([prefix,'.mat'],'uu','vv','peakslocation', '-mat','-append');
 end
