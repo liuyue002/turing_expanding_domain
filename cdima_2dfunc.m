@@ -66,13 +66,13 @@ A(end-nx+1:end,end-nx+1:end)=T2;
 A = A/(dx^2);
 
 %% initial condition
-u(:)=u0;
-u = u + (rand(size(u))*0.6-0.3);
+%u(:)=u0;
+%u = u + (rand(size(u))*0.6-0.3);
 %u = rand(size(u))*3;
-%q=0.911;
-%u = 2.405 + 1.156*cos(q*Y);
+q=0.911;
+u = 2.405 + 1.156*cos(q*Y);
 v(:)=v0;
-%v = 6.668 + 0.709*cos(q*Y);
+v = 6.668 + 0.709*cos(q*Y);
 
 if ispc % is windows
     folder='D:\liuyueFolderOxford1\turingpattern\simulations\';
@@ -89,7 +89,7 @@ if wid >= L
 else
     widthtext=['narrow_wid=', num2str(wid),'_'];
 end
-ictext = 'hssinit_'; % 'hssinit_' or 'wavyinit_'
+ictext = 'wavyinit_'; % 'hssinit_' or 'wavyinit_'
 prefix = strcat('cdima_2d_',noisetext,widthtext,ictext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_b=', num2str(b), '_growth=', num2str(growthrate) );
 prefix = strcat(folder, prefix);
 if makegif

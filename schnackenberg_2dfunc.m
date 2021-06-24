@@ -16,6 +16,7 @@ else
 end
 dt=0.01;
 nt=T/dt+1;
+nFrame=ceil((T/dt)/drawperframe);
 sympref('HeavisideAtOrigin',0);
 
 %% parameters
@@ -23,11 +24,11 @@ sympref('HeavisideAtOrigin',0);
 % leah: 0.2, 0.2, 2.0, 0.01, 1
 gamma = 1.0;
 a = 0.05;
-b = 1.6;
+b = 1.4;
 Du = 1;
 Dv = 20;
 Wmax = 1.0; %1.0
-wid=L+10; % put L+10 for full-sized domain to avoid annoying boundary issue
+wid=10; % put L+10 for full-sized domain to avoid annoying boundary issue
 if growthrate == 0
     rho=@(t) L+10;
     W=@(x,y,t) ones(size(x))*0;
@@ -54,6 +55,8 @@ xmeshvec = reshape(X,[nx^2,1]);
 ymeshvec = reshape(Y,[nx^2,1]);
 u=zeros(nx,nx);
 v=zeros(nx,nx);
+ucrosssec=zeros(nFrame,nx);
+ucrosssecpeaksloc=NaN(nFrame,30);%there probably won't be more than 30 peaks
 
 I=speye(nx);
 e=ones(nx,1);
@@ -73,9 +76,9 @@ A = A/(dx^2);
 u(:)=u0;
 u = u + (rand(size(u))*0.6-0.3);
 %u = rand(size(u))*3;
+v(:)=v0;
 %q=0.5655;
 %u = 1.45 + 0.98*cos(q*Y);
-v(:)=v0;
 %v = 0.65 - 0.20*cos(q*Y);
 
 if ispc % is windows
@@ -211,10 +214,15 @@ for ti=1:1:nt
             Wval=W(X,Y,t);
             Wfig.CData=Wval;
             
-            horiz_crossec.YData=u(round(nx/2),:);
+            ucrosssecval=u(round(nx/2),:);
+            horiz_crossec.YData=ucrosssecval;
             fig_horiz_title.String=['u(y=0,t=',num2str(t),')'];
             vert_crossec.YData=u(:,round(nx/2));
             fig_vert_title.String=['u(x=0,t=',num2str(t),')'];
+            iFrame=(ti-1)/drawperframe+1;
+            ucrosssec(iFrame,:)=ucrosssecval;
+            [~,peaklocindex]=findpeaks(ucrosssecval,'MinPeakProminence',0.1);
+            ucrosssecpeaksloc(iFrame,1:length(peaklocindex))=x(peaklocindex);
             drawnow;
         end
         iFrame=(ti-1)/drawperframe+1;
@@ -333,13 +341,27 @@ if makegif
     title('v','FontSize',25);
     saveas(vfigfinal,[prefix,'_vfinal.png']);
     saveas(vfigfinal,[prefix,'_vfinal.fig']);
+    
+    peaklocfig=figure('Position',[100 100 700 550],'color','w');
+    ts=0:drawperframe*dt:T;
+    hold on
+    for i=2:30
+        plot(ts(2:end),ucrosssecpeaksloc(2:end,i),'.k');
+    end
+    xlim([0,T]);
+    ylim([-L,L]);
+    xlabel('t');
+    ylabel('peaks of u');
+    biggerFont(gca);
+    tightEdge(gca);
+    saveas(peaklocfig,[prefix,'_peakloc.png']);
 end
 %% saving
 
 if makegif
     ufinal = u;
     vfinal = v;
-    save([prefix,'.mat'],'ufinal','vfinal','uyy_est','vyy_est', '-mat','-append');
+    save([prefix,'.mat'],'ufinal','vfinal','uyy_est','vyy_est','ucrosssec','ucrosssecpeaksloc', '-mat','-append');
 end
 
 end

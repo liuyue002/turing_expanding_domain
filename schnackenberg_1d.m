@@ -8,7 +8,7 @@ drawperframe=100;
 L=100; % half-domain size
 nx=600;
 dx=2*L/nx;
-growthrate = 0.75; % bif, 0.05 to 0.75
+growthrate = 5; % bif, 0.05 to 0.75
 if growthrate == 0
     T=200;
 else
@@ -26,29 +26,42 @@ b = 1.4;
 Du = 1;
 Dv = 20;
 Wmax = 1.0; %1.0
+uyy_lag=5; % 0 to 10
 if growthrate == 0
     rho=@(t) L+10; % put L+10 for full-sized domain to avoid annoying boundary issue
     effectiveL = @(t) L;
     W=@(x,t) ones(size(x))*0;
-    Wmax=0;
 else
-    rho=@(t) -0.8*L+growthrate*max(t-50,0);
+    rho=@(t) -L+growthrate*max(t-50,0);
     effectiveL = @(t) min(L+rho(t),2*L);
     W=@(x,t) Wmax*heaviside(x-rho(t));
 end
 
-uyy_est = -0.0; % -0.28810;
-vyy_est =  0.0; %  0.06471;
+uyy_est = 0; % -0.28810;
+vyy_est = 0; %  0.06471;
 
 %% reaction
-f = @(u,v,x,t) gamma * (a + W(x,t) - u + (u.^2).*v) + Du*uyy_est;
-g = @(u,v,x,t) gamma * (b - (u.^2).*v) + Dv*vyy_est;
-aeff=a+Wmax+(Du/gamma)*uyy_est;
+f = @(u,v,x,t) gamma * (a + W(x,t) - u + (u.^2).*v) + Du*uyy_est*(1-heaviside(x-rho(t)+uyy_lag));
+g = @(u,v,x,t) gamma * (b - (u.^2).*v) + Dv*vyy_est*(1-heaviside(x-rho(t)+uyy_lag));
+
+aeff=a+(Du/gamma)*uyy_est;
 beff=b+(Dv/gamma)*vyy_est;
 u0 = aeff+beff;
 v0 = beff/(u0^2);
-noisestrength = 0;
-fprintf('Equilibrium: u0=%.5f, v0=%.5f\n',u0,v0);
+noisestrength = 0.0;
+fprintf('Equilibrium inside effective domain: u0=%.5f, v0=%.5f\n',u0,v0);
+
+aeff=a+Wmax;
+beff=b;
+u00 = aeff+beff;
+v00 = beff/(u00^2);
+fprintf('Equilibrium outside effective domain: u00=%.5f, v00=%.5f\n',u00,v00);
+
+aeff=a;
+beff=b;
+u01 = aeff+beff;
+v01 = beff/(u00^2);
+fprintf('Equilibrium in the lag zone: u01=%.5f, v01=%.5f\n',u01,v01);
 
 %% FDM setup
 x=linspace(-L,L,nx)';
@@ -83,7 +96,7 @@ end
 if uyy_est==0 && vyy_est==0
     uyytext = '';
 else
-    uyytext = 'uyyAdjusted_';
+    uyytext = ['uyyAdjusted_lag=',num2str(uyy_lag),'_'];
 end
 prefix = strcat('schnackenberg_1d_',uyytext ,noisetext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate) );
 prefix = strcat(folder, prefix);
