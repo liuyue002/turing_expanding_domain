@@ -8,7 +8,7 @@ drawperframe=100;
 L=100; % half-domain size
 nx=600;
 dx=2*L/nx;
-growthrate = 5; % bif, 0.05 to 0.75
+growthrate = 0.1; % bif, 0.05 to 0.75
 if growthrate == 0
     T=200;
 else
@@ -32,7 +32,7 @@ if growthrate == 0
     effectiveL = @(t) L;
     W=@(x,t) ones(size(x))*0;
 else
-    rho=@(t) -L+growthrate*max(t-50,0);
+    rho=@(t) -L+growthrate*t;
     effectiveL = @(t) min(L+rho(t),2*L);
     W=@(x,t) Wmax*heaviside(x-rho(t));
 end
@@ -48,7 +48,7 @@ aeff=a+(Du/gamma)*uyy_est;
 beff=b+(Dv/gamma)*vyy_est;
 u0 = aeff+beff;
 v0 = beff/(u0^2);
-noisestrength = 0.0;
+noisestrength = 0.01;
 fprintf('Equilibrium inside effective domain: u0=%.5f, v0=%.5f\n',u0,v0);
 
 aeff=a+Wmax;
@@ -228,11 +228,12 @@ if makegif
 end
 if kymograph
     kymograph_pos = [100,100,650,500];
-    u_kymograph = plot_kymograph(uu, kymograph_pos,T,[-L,L],'u');
-    v_kymograph = plot_kymograph(vv, kymograph_pos,T,[-L,L],'v');
+    u_kymograph = plot_kymograph(uu, kymograph_pos,T,[-L,L],NaN,'u',0);
+    v_kymograph = plot_kymograph(vv, kymograph_pos,T,[-L,L],NaN,'v',0);
     saveas(u_kymograph,[prefix,'_ukymograph.png']);
     saveas(v_kymograph,[prefix,'_vkymograph.png']);
-    
+    u_kymograph2 = plot_kymograph(uu, [100,100,650,550],T,[-L,L],[0,3],'',1);
+    saveas(u_kymograph2,[prefix,'_ukymograph_tight.png']);
     
     peaklocfig=figure('Position',[100 100 900 750],'color','w');
     ts=0:drawperframe*dt:T;

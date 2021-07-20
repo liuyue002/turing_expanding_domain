@@ -13,7 +13,7 @@ if growthrate == 0
 else
     T=200/growthrate + 100;
 end
-dt=0.01;
+dt=0.02;
 nt=T/dt+1;
 sympref('HeavisideAtOrigin',0);
 
@@ -30,7 +30,7 @@ if growthrate == 0
     W=@(x,y,t) ones(size(x))*0;
     Wmax=0;
 else
-    rho=@(t) -0.8*L+growthrate*t;
+    rho=@(t) -L+growthrate*t;
     W=@(x,y,t) Wmax*(1-heaviside(-x+rho(t)).*heaviside(y+wid).*heaviside(-y+wid));
 end
 
@@ -39,7 +39,7 @@ f = @(u,v,x,y,t) a-u-4*u.*v./(1+u.^2)-W(x,y,t);
 g = @(u,v,x,y,t) sigma*b*(u-u.*v./(1+u.^2) + W(x,y,t));
 u0 = (a-5*Wmax)/5;
 v0 = (u0+Wmax)*(1+u0^2)/u0;
-noisestrength = 0.01;
+noisestrength = 0;
 fprintf('Equilibrium outside of effective domain: u0=%.5f, v0=%.5f\n',u0,v0);
 
 %% FDM setup
@@ -66,13 +66,13 @@ A(end-nx+1:end,end-nx+1:end)=T2;
 A = A/(dx^2);
 
 %% initial condition
-%u(:)=u0;
-%u = u + (rand(size(u))*0.6-0.3);
+u(:)=u0;
+u = u + (rand(size(u))*0.6-0.3);
 %u = rand(size(u))*3;
-q=0.911;
-u = 2.405 + 1.156*cos(q*Y);
+%q=0.911;
+%u = 2.405 + 1.156*cos(q*Y);
 v(:)=v0;
-v = 6.668 + 0.709*cos(q*Y);
+%v = 6.668 + 0.709*cos(q*Y);
 
 if ispc % is windows
     folder='D:\liuyueFolderOxford1\turingpattern\simulations\';
@@ -89,7 +89,7 @@ if wid >= L
 else
     widthtext=['narrow_wid=', num2str(wid),'_'];
 end
-ictext = 'wavyinit_'; % 'hssinit_' or 'wavyinit_'
+ictext = 'hssinit_'; % 'hssinit_' or 'wavyinit_'
 prefix = strcat('cdima_2d_',noisetext,widthtext,ictext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_b=', num2str(b), '_growth=', num2str(growthrate) );
 prefix = strcat(folder, prefix);
 if makegif
