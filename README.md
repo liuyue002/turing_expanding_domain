@@ -10,3 +10,8 @@ The 'public' branch contains cleaned up codes that simulate the models. If you a
 The 'main' branch additionally contain codes for analysis, auxillary scripts, as well as work-in-progress, it is unlikely to be interesting to anyone else.
 Ignore the other branches
 
+## Files
+
+* cdima\_1d.m, cdima\_2d.m: for simulating the CDIMA model
+* schnackenberg\_1d.m, schnackenberg\_2d.m: for simulating the Schnackenberg model
+* biggerFont.m, plot\_kymograph.m, tightEdge.m: utilities for plotting, called by the other scripts
