@@ -8,7 +8,7 @@ drawperframe=50;
 L=100; % half-domain size
 nx=400;
 dx=2*L/nx;
-growthrate = 0.4; % bif, 0.05 to 0.75
+growthrate = 0; % bif, 0.05 to 0.75
 if growthrate == 0
     T=200;
 else
@@ -31,11 +31,11 @@ if growthrate == 0
     W=@(x,t) ones(size(x))*0;
     Wmax=0;
 else
-    rho=@(t) -0.8*L+growthrate*max(t-50,0);
+    rho=@(t) -L+growthrate*t;
     W=@(x,t) Wmax*heaviside(x-rho(t));
 end
-uyy_est = -0.28810; % -0.28810;
-vyy_est =  0.06471; %  0.06471;
+uyy_est = 0; % -0.28810;
+vyy_est = 0; %  0.06471;
 
 %% reaction
 f = @(u,v,x,t) a-u-4*u.*v./(1+u.^2)-W(x,t);
@@ -94,7 +94,7 @@ if showanimation
     hold on
     xlabel('x');
     ylabel('u,v,W');
-    axis([-L,L,0,4]);
+    axis([-L,L,0,8]);
     ufig=plot(x,u);
     vfig=plot(x,v);
     Wval = W(x,0);
@@ -201,8 +201,8 @@ if makegif
 end
 if kymograph
     kymograph_pos = [100,100,650,500];
-    u_kymograph = plot_kymograph(uu, kymograph_pos,T,[-L,L],'u');
-    v_kymograph = plot_kymograph(vv, kymograph_pos,T,[-L,L],'v');
+    u_kymograph = plot_kymograph(uu, kymograph_pos,T,[-L,L],NaN,'u',0);
+    v_kymograph = plot_kymograph(vv, kymograph_pos,T,[-L,L],NaN,'v',0);
     saveas(u_kymograph,[prefix,'_ukymograph.png']);
     saveas(v_kymograph,[prefix,'_vkymograph.png']);
 end

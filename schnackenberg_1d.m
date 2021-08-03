@@ -233,6 +233,7 @@ if kymograph
     saveas(u_kymograph,[prefix,'_ukymograph.png']);
     saveas(v_kymograph,[prefix,'_vkymograph.png']);
     u_kymograph2 = plot_kymograph(uu, [100,100,650,550],T,[-L,L],[0,3],'',1);
+    %hold on; plot([0,160],[0,nx],'r--','LineWidth',3);
     saveas(u_kymograph2,[prefix,'_ukymograph_tight.png']);
     
     peaklocfig=figure('Position',[100 100 900 750],'color','w');
