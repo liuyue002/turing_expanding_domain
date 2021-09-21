@@ -122,8 +122,8 @@ if showanimation
     set(sfig1,'YTick',0:(nx/numticks):nx);
     set(sfig1,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(sfig1,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,200]);
-    ylim([0,200]);
+    xlim([0,nx]);
+    ylim([0,nx]);
     utitle=title('u, t=0');
     hold off
     pbaspect([1 1 1]);
@@ -140,8 +140,8 @@ if showanimation
     set(sfig2,'YTick',0:(nx/numticks):nx);
     set(sfig2,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(sfig2,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,200]);
-    ylim([0,200]);
+    xlim([0,nx]);
+    ylim([0,nx]);
     title('v');
     pbaspect([1 1 1]);
     
@@ -158,8 +158,8 @@ if showanimation
     set(sfig3,'YTick',0:(nx/numticks):nx);
     set(sfig3,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(sfig3,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,200]);
-    ylim([0,200]);
+    xlim([0,nx]);
+    ylim([0,nx]);
     title('W');
     pbaspect([1 1 1]);
     

@@ -4,18 +4,18 @@ function schnackenberg_2dfunc(growthrate)
 %% options
 makegif=1;
 showanimation=1;
-drawperframe=200;
 L=100; % half-domain size
-nx=200;
+nx=160;
 dx=2*L/nx;
 %growthrate = 0.1; % bif, 0.05 to 0.75
 if growthrate == 0
-    T=200;
+    T=350;
 else
     T=200/growthrate + 150;
 end
-dt=0.01;
+dt=0.00025;
 nt=T/dt+1;
+drawperframe=2/dt;
 nFrame=ceil((T/dt)/drawperframe);
 sympref('HeavisideAtOrigin',0);
 
@@ -28,7 +28,7 @@ b = 1.4;
 Du = 1;
 Dv = 20;
 Wmax = 1.0; %1.0
-wid=10; % put L+10 for full-sized domain to avoid annoying boundary issue
+wid=L+10; % put L+10 for full-sized domain to avoid annoying boundary issue
 if growthrate == 0
     rho=@(t) L+10;
     W=@(x,y,t) ones(size(x))*0;
@@ -55,6 +55,8 @@ xmeshvec = reshape(X,[nx^2,1]);
 ymeshvec = reshape(Y,[nx^2,1]);
 u=zeros(nx,nx);
 v=zeros(nx,nx);
+uu = zeros(nFrame,nx,nx); % history of u
+vv = zeros(nFrame,nx,nx);
 ucrosssec=zeros(nFrame,nx);
 ucrosssecpeaksloc=NaN(nFrame,30);%there probably won't be more than 30 peaks
 
@@ -74,7 +76,8 @@ A = A/(dx^2);
 
 %% initial condition
 u(:)=u0;
-u = u + (rand(size(u))*0.6-0.3);
+u(1,1) = 2*u0;
+%u = u + (rand(size(u))*0.6-0.3);
 %u = rand(size(u))*3;
 v(:)=v0;
 %q=0.5655;
@@ -96,9 +99,10 @@ if wid >= L
 else
     widthtext=['narrow_wid=', num2str(wid),'_'];
 end
-ictext = 'hssinit_'; % 'hssinit_' or 'wavyinit_'
-prefix = strcat('schnackenberg_2d_',noisetext,widthtext,ictext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate) );
+ictext = 'cornerinit_'; % 'hssinit_' or 'wavyinit_'
+prefix = strcat('schnackenberg_2d_',noisetext,widthtext,ictext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate), '_dt=', num2str(dt) );
 prefix = strcat(folder, prefix);
+fprintf('saving to %s\n',prefix);
 if makegif
     uinit=u;
     vinit=v;
@@ -131,8 +135,8 @@ if showanimation
     set(sfig1,'YTick',0:(nx/numticks):nx);
     set(sfig1,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(sfig1,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,200]);
-    ylim([0,200]);
+    xlim([0,nx]);
+    ylim([0,nx]);
     utitle=title('u, t=0');
     hold off
     pbaspect([1 1 1]);
@@ -149,8 +153,8 @@ if showanimation
     set(sfig2,'YTick',0:(nx/numticks):nx);
     set(sfig2,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(sfig2,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,200]);
-    ylim([0,200]);
+    xlim([0,nx]);
+    ylim([0,nx]);
     title('v');
     pbaspect([1 1 1]);
     
@@ -171,8 +175,8 @@ if showanimation
     set(sfig3,'YTick',0:(nx/numticks):nx);
     set(sfig3,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(sfig3,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,200]);
-    ylim([0,200]);
+    xlim([0,nx]);
+    ylim([0,nx]);
     title('W');
     pbaspect([1 1 1]);
     
@@ -224,6 +228,9 @@ for ti=1:1:nt
             [~,peaklocindex]=findpeaks(ucrosssecval,'MinPeakProminence',0.1);
             ucrosssecpeaksloc(iFrame,1:length(peaklocindex))=x(peaklocindex);
             drawnow;
+            
+            uu(iFrame,:,:) = u;
+            vv(iFrame,:,:) = v;
         end
         iFrame=(ti-1)/drawperframe+1;
         if makegif
@@ -361,7 +368,7 @@ end
 if makegif
     ufinal = u;
     vfinal = v;
-    save([prefix,'.mat'],'ufinal','vfinal','uyy_est','vyy_est','ucrosssec','ucrosssecpeaksloc', '-mat','-append');
+    save([prefix,'.mat'],'ufinal','vfinal','uu','vv','uyy_est','vyy_est','ucrosssec','ucrosssecpeaksloc', '-mat','-append');
 end
 
 end
