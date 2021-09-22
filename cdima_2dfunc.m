@@ -13,7 +13,7 @@ if growthrate == 0
 else
     T=200/growthrate + 100;
 end
-dt=0.02;
+dt=0.01;
 nt=T/dt+1;
 sympref('HeavisideAtOrigin',0);
 
@@ -25,13 +25,19 @@ sigma=50;
 %growthrate = 0.2; % bif, 0.05 to 0.75
 Wmax = 1.5; %1.5
 wid=L+10; % put L+10 for full-sized domain to avoid annoying boundary issue
+circular=1;
 if growthrate == 0
     rho=@(t) L+10;
     W=@(x,y,t) ones(size(x))*0;
     Wmax=0;
 else
-    rho=@(t) -L+growthrate*t;
-    W=@(x,y,t) Wmax*(1-heaviside(-x+rho(t)).*heaviside(y+wid).*heaviside(-y+wid));
+    if circular
+        rho=@(t) min(growthrate*t,L);
+        W=@(x,y,t) ((x.^2 + y.^2) > (rho(t)^2)) * Wmax;
+    else
+        rho=@(t) -L+growthrate*t;
+        W=@(x,y,t) Wmax*(1-heaviside(-x+rho(t)).*heaviside(y+wid).*heaviside(-y+wid));
+    end
 end
 
 %% reaction
@@ -84,14 +90,20 @@ if noisestrength == 0
 else
     noisetext='noisy_';
 end
+if circular
+    circletext='circular_';
+else
+    circletext='';
+end
 if wid >= L
     widthtext='';
 else
     widthtext=['narrow_wid=', num2str(wid),'_'];
 end
 ictext = 'hssinit_'; % 'hssinit_' or 'wavyinit_'
-prefix = strcat('cdima_2d_',noisetext,widthtext,ictext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_b=', num2str(b), '_growth=', num2str(growthrate) );
+prefix = strcat('cdima_2d_',noisetext,widthtext,circletext,ictext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_b=', num2str(b), '_growth=', num2str(growthrate) );
 prefix = strcat(folder, prefix);
+fprintf('saving to %s\n',prefix);
 if makegif
     save([prefix,'.mat'], '-mat');
 end
@@ -111,7 +123,11 @@ if showanimation
     sfig1=subplot('Position',[0.04,0,0.28,1]);
     hold on
     ufig=imagesc(u,urange);
-    Wline=plot([(rho(0)+L)/dx,(rho(0)+L)/dx],[0,nx],'-b');
+    if circular
+        ucirc=draw_circle(nx/2,nx/2,0);
+    else
+        Wline=plot([(rho(0)+L)/dx,(rho(0)+L)/dx],[0,nx],'-b');
+    end
     xlabel('x');
     ylabel('y');
     set(gca,'YDir','normal');
@@ -199,7 +215,11 @@ for ti=1:1:nt
             ufig.CData=u;
             vfig.CData=v;
             utitle.String=['u, t=',num2str(t)];
-            Wline.XData=[(rho(t)+L)/dx,(rho(t)+L)/dx];
+            if circular
+                update_circle(ucirc,nx/2,nx/2,rho(t) * (nx/(2*L)));
+            else
+                Wline.XData=[(rho(t)+L)/dx,(rho(t)+L)/dx];
+            end
             Wval=W(X,Y,t);
             Wfig.CData=Wval;
             

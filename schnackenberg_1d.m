@@ -8,7 +8,7 @@ drawperframe=100;
 L=100; % half-domain size
 nx=600;
 dx=2*L/nx;
-growthrate = 0.1; % bif, 0.05 to 0.75
+growthrate = 0; % bif, 0.05 to 0.75
 if growthrate == 0
     T=200;
 else
@@ -48,7 +48,7 @@ aeff=a+(Du/gamma)*uyy_est;
 beff=b+(Dv/gamma)*vyy_est;
 u0 = aeff+beff;
 v0 = beff/(u0^2);
-noisestrength = 0.01;
+noisestrength = 0.0;
 fprintf('Equilibrium inside effective domain: u0=%.5f, v0=%.5f\n',u0,v0);
 
 aeff=a+Wmax;
@@ -137,7 +137,7 @@ effectiveLs = zeros(nFrame,1); %keep track of effective domain length
 th=0.5; % 0: fw euler, 0.5: Crank-Nicosen, 1: bw euler
 Tu=speye(nx)-th*dt*Du*A;
 Tv=speye(nx)-th*dt*Dv*A;
-
+pattern_fully_developed=0;
 for ti=1:1:nt
     t=dt*(ti-1);
     if (mod(ti, drawperframe) == 1)
@@ -183,7 +183,10 @@ for ti=1:1:nt
     vnew = Tv\vrhs;
     
     u=unew; v=vnew;
-    
+    if (~pattern_fully_developed) && abs(u(end)-u0)>0.5
+        pattern_fully_developed=1;
+        fprintf('pattern fully developed at %.5f\n',t);
+    end
     if (mod(ti, drawperframe) == 0)
         utotal=sum(sum(u))*dx;
         vtotal=sum(sum(v))*dx;
@@ -234,6 +237,7 @@ if kymograph
     saveas(v_kymograph,[prefix,'_vkymograph.png']);
     u_kymograph2 = plot_kymograph(uu, [100,100,650,550],T,[-L,L],[0,3],'',1);
     %hold on; plot([0,160],[0,nx],'r--','LineWidth',3);
+    %hold on; plot([0,T/dt/drawperframe],[0,T*growthrate/dx],'b--','LineWidth',3);
     saveas(u_kymograph2,[prefix,'_ukymograph_tight.png']);
     
     peaklocfig=figure('Position',[100 100 900 750],'color','w');
