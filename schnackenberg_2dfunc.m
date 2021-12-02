@@ -18,18 +18,20 @@ nt=T/dt+1;
 drawperframe=2/dt;
 nFrame=ceil((T/dt)/drawperframe);
 sympref('HeavisideAtOrigin',0);
+rng_seed=0;
+rng(rng_seed); %change random seed
 
 %% parameters
 % mine: 1, 0.05, 1.4, 1, 20
 % leah: 0.2, 0.2, 2.0, 0.01, 1
 gamma = 1.0;
 a = 0.05;
-b = 1.4;
+b = 1.6;
 Du = 1;
 Dv = 20;
 Wmax = 1.0; %1.0
 wid=L+10; % put L+10 for full-sized domain to avoid annoying boundary issue
-circular=1;
+circular=0;
 if growthrate == 0
     rho=@(t) L+10;
     W=@(x,y,t) ones(size(x))*0;
@@ -50,7 +52,7 @@ f = @(u,v,x,y,t) gamma * (a + W(x,y,t) - u + (u.^2).*v);
 g = @(u,v,x,y,t) gamma * (b - (u.^2).*v);
 u0 = a+Wmax+b;
 v0 = b/(u0^2);
-noisestrength = 0; %0.01
+noisestrength = 0.01; %0.01
 fprintf('Equilibrium outside of effective domain: u0=%.5f, v0=%.5f\n',u0,v0);
 
 %% FDM setup
@@ -82,8 +84,11 @@ A = A/(dx^2);
 
 %% initial condition
 u(:)=u0;
+u(:,1)=2*u0;
 %u(1,1) = 2*u0;
-u = u + (rand(size(u))*0.6-0.3);
+%u(nx/2,nx/2) = 2*u0;
+%u(round(nx*0.6),round(nx*0.2)) = 2*u0;
+%u = u + (rand(size(u))*0.6-0.3);
 %u = rand(size(u))*3;
 v(:)=v0;
 %q=0.5655;
@@ -110,8 +115,8 @@ if wid >= L
 else
     widthtext=['narrow_wid=', num2str(wid),'_'];
 end
-ictext = 'hssinit_'; % 'hssinit_' or 'wavyinit_'
-prefix = strcat('schnackenberg_2d_',noisetext,widthtext,circletext,ictext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate), '_dt=', num2str(dt) );
+ictext = 'boundaryinit_'; % 'hssinit_' or 'wavyinit_' or 'hssnonoiseinit_' or 'boundaryinit_'
+prefix = strcat('schnackenberg_2d_',noisetext,widthtext,circletext,ictext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'), '_b=', num2str(b), '_growth=', num2str(growthrate));
 prefix = strcat(folder, prefix);
 fprintf('saving to %s\n',prefix);
 if makegif
@@ -150,8 +155,8 @@ if showanimation
     set(sfig1,'YTick',0:(nx/numticks):nx);
     set(sfig1,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(sfig1,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,nx]);
-    ylim([0,nx]);
+    xlim([1,nx]);
+    ylim([1,nx]);
     utitle=title('u, t=0');
     hold off
     pbaspect([1 1 1]);
@@ -168,8 +173,8 @@ if showanimation
     set(sfig2,'YTick',0:(nx/numticks):nx);
     set(sfig2,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(sfig2,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,nx]);
-    ylim([0,nx]);
+    xlim([1,nx]);
+    ylim([1,nx]);
     title('v');
     pbaspect([1 1 1]);
     
@@ -190,8 +195,8 @@ if showanimation
     set(sfig3,'YTick',0:(nx/numticks):nx);
     set(sfig3,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(sfig3,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,nx]);
-    ylim([0,nx]);
+    xlim([1,nx]);
+    ylim([1,nx]);
     title('W');
     pbaspect([1 1 1]);
     
@@ -320,6 +325,8 @@ if makegif
     
     ufigfinal=figure('Position',fig_pos_square,'color','w');
     imagesc(u,urange);
+    xlim([1,nx]);
+    ylim([1,nx]);
     set(gca,'YDir','normal');
     axis image;
     colormap('hot');
@@ -337,14 +344,14 @@ if makegif
     set(gca,'YTick',0:(nx/numticks):nx);
     set(gca,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(gca,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,200]);
-    ylim([0,200]);
     title(['u, t=',num2str(T)],'FontSize',25);
     saveas(ufigfinal,[prefix,'_ufinal.png']);
     saveas(ufigfinal,[prefix,'_ufinal.fig']);
     
     vfigfinal=figure('Position',fig_pos_square,'color','w');
     imagesc(v, vrange);
+    xlim([1,nx]);
+    ylim([1,nx]);
     set(gca,'YDir','normal');
     axis image;
     colormap('hot');
@@ -362,8 +369,6 @@ if makegif
     set(gca,'YTick',0:(nx/numticks):nx);
     set(gca,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(gca,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,200]);
-    ylim([0,200]);
     title('v','FontSize',25);
     saveas(vfigfinal,[prefix,'_vfinal.png']);
     saveas(vfigfinal,[prefix,'_vfinal.fig']);

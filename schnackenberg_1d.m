@@ -4,11 +4,11 @@ clear;clc;close all;
 makegif=1;
 showanimation=1;
 kymograph=1;
-drawperframe=100;
+drawperframe=200;
 L=100; % half-domain size
 nx=600;
 dx=2*L/nx;
-growthrate = 0; % bif, 0.05 to 0.75
+growthrate = 0.2; % bif, 0.05 to 0.75
 if growthrate == 0
     T=200;
 else
@@ -98,7 +98,7 @@ if uyy_est==0 && vyy_est==0
 else
     uyytext = ['uyyAdjusted_lag=',num2str(uyy_lag),'_'];
 end
-prefix = strcat('schnackenberg_1d_',uyytext ,noisetext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_a=',num2str(a), '_b=', num2str(b), '_growth=', num2str(growthrate) );
+prefix = strcat('schnackenberg_1d_',uyytext ,noisetext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_b=', num2str(b), '_growth=', num2str(growthrate) );
 prefix = strcat(folder, prefix);
 if makegif
     save([prefix,'.mat'], '-mat');
@@ -236,7 +236,7 @@ if kymograph
     saveas(u_kymograph,[prefix,'_ukymograph.png']);
     saveas(v_kymograph,[prefix,'_vkymograph.png']);
     u_kymograph2 = plot_kymograph(uu, [100,100,650,550],T,[-L,L],[0,3],'',1);
-    %hold on; plot([0,160],[0,nx],'r--','LineWidth',3);
+    %hold on; plot([0,160],[0,nx],'g--','LineWidth',3);
     %hold on; plot([0,T/dt/drawperframe],[0,T*growthrate/dx],'b--','LineWidth',3);
     saveas(u_kymograph2,[prefix,'_ukymograph_tight.png']);
     

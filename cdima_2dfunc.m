@@ -3,7 +3,7 @@ function cdima_2dfunc(growthrate)
 %% options
 makegif=1;
 showanimation=1;
-drawperframe=100;
+drawperframe=200;
 L=100; % half-domain size
 nx=200;
 dx=2*L/nx;
@@ -16,6 +16,8 @@ end
 dt=0.01;
 nt=T/dt+1;
 sympref('HeavisideAtOrigin',0);
+rng_seed=0;
+rng(rng_seed); %change random seed
 
 %% parameters
 a=12;
@@ -25,7 +27,7 @@ sigma=50;
 %growthrate = 0.2; % bif, 0.05 to 0.75
 Wmax = 1.5; %1.5
 wid=L+10; % put L+10 for full-sized domain to avoid annoying boundary issue
-circular=1;
+circular=0;
 if growthrate == 0
     rho=@(t) L+10;
     W=@(x,y,t) ones(size(x))*0;
@@ -45,7 +47,7 @@ f = @(u,v,x,y,t) a-u-4*u.*v./(1+u.^2)-W(x,y,t);
 g = @(u,v,x,y,t) sigma*b*(u-u.*v./(1+u.^2) + W(x,y,t));
 u0 = (a-5*Wmax)/5;
 v0 = (u0+Wmax)*(1+u0^2)/u0;
-noisestrength = 0;
+noisestrength = 0.01;
 fprintf('Equilibrium outside of effective domain: u0=%.5f, v0=%.5f\n',u0,v0);
 
 %% FDM setup
@@ -73,7 +75,8 @@ A = A/(dx^2);
 
 %% initial condition
 u(:)=u0;
-u = u + (rand(size(u))*0.6-0.3);
+u(:,1)=2*u0;
+%u = u + (rand(size(u))*0.6-0.3);
 %u = rand(size(u))*3;
 %q=0.911;
 %u = 2.405 + 1.156*cos(q*Y);
@@ -100,8 +103,8 @@ if wid >= L
 else
     widthtext=['narrow_wid=', num2str(wid),'_'];
 end
-ictext = 'hssinit_'; % 'hssinit_' or 'wavyinit_'
-prefix = strcat('cdima_2d_',noisetext,widthtext,circletext,ictext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_b=', num2str(b), '_growth=', num2str(growthrate) );
+ictext = 'boundaryinit_'; % 'hssinit_' or 'wavyinit_' or 'hssnonoiseinit_' or 'boundaryinit_'
+prefix = strcat('cdima_2d_',noisetext,widthtext,circletext,ictext, datestr(datetime('now'), 'yyyymmdd_HHMMSS'),'_growth=', num2str(growthrate) );
 prefix = strcat(folder, prefix);
 fprintf('saving to %s\n',prefix);
 if makegif
@@ -138,8 +141,8 @@ if showanimation
     set(sfig1,'YTick',0:(nx/numticks):nx);
     set(sfig1,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(sfig1,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,nx]);
-    ylim([0,nx]);
+    xlim([1,nx]);
+    ylim([1,nx]);
     utitle=title('u, t=0');
     hold off
     pbaspect([1 1 1]);
@@ -156,14 +159,18 @@ if showanimation
     set(sfig2,'YTick',0:(nx/numticks):nx);
     set(sfig2,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(sfig2,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,nx]);
-    ylim([0,nx]);
+    xlim([1,nx]);
+    ylim([1,nx]);
     title('v');
     pbaspect([1 1 1]);
     
     sfig3=subplot('Position',[0.70,0,0.28,1]);
     Wval=W(X,Y,0);
-    Wfig=imagesc(Wval,[0, Wmax]);
+    if Wmax > 0
+        Wfig=imagesc(Wval,[0, Wmax]);
+    else
+        Wfig=imagesc(Wval,[0,1]);
+    end
     xlabel('x');
     ylabel('y');
     set(gca,'YDir','normal');
@@ -174,8 +181,8 @@ if showanimation
     set(sfig3,'YTick',0:(nx/numticks):nx);
     set(sfig3,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(sfig3,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,nx]);
-    ylim([0,nx]);
+    xlim([1,nx]);
+    ylim([1,nx]);
     title('W');
     pbaspect([1 1 1]);
     
@@ -298,6 +305,8 @@ if makegif
     
     ufigfinal=figure('Position',fig_pos_square,'color','w');
     imagesc(u,urange);
+    xlim([1,200]);
+    ylim([1,200]);
     set(gca,'YDir','normal');
     axis image;
     colormap('hot');
@@ -315,14 +324,14 @@ if makegif
     set(gca,'YTick',0:(nx/numticks):nx);
     set(gca,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(gca,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,200]);
-    ylim([0,200]);
     title(['u, t=',num2str(T)],'FontSize',25);
     saveas(ufigfinal,[prefix,'_ufinal.png']);
     saveas(ufigfinal,[prefix,'_ufinal.fig']);
     
     vfigfinal=figure('Position',fig_pos_square,'color','w');
     imagesc(v, vrange);
+    xlim([1,200]);
+    ylim([1,200]);
     set(gca,'YDir','normal');
     axis image;
     colormap('hot');
@@ -340,8 +349,6 @@ if makegif
     set(gca,'YTick',0:(nx/numticks):nx);
     set(gca,'XTickLabel',num2str((-L:2*L/numticks:L)'));
     set(gca,'YTickLabel',num2str((-L:2*L/numticks:L)'));
-    xlim([0,200]);
-    ylim([0,200]);
     title('v','FontSize',25);
     saveas(vfigfinal,[prefix,'_vfinal.png']);
     saveas(vfigfinal,[prefix,'_vfinal.fig']);

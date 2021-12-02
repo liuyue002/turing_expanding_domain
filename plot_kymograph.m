@@ -42,6 +42,7 @@ if isnan(urange)
     urange=[umin,umax];
 end
 imagesc(uu',urange);
+colormap('hot');
 set(gca,'YDir','normal');
 %colorbar('FontSize',40,'TickLabels',ucolortick,'Ticks',ucolortick);
 set(gca,'XTick',tTick);
